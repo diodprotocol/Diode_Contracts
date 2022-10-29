@@ -219,8 +219,8 @@ contract Diode_test is Test {
 
         emit log_named_uint("Euler Strat Balance before:", eulerStrat.stratBalance());
 
-        emit log_named_uint("expected APY longs:", diode.expectedAPY_longs());
-        emit log_named_uint("expected APY shorts:", diode.expectedAPY_shorts());
+        emit log_named_uint("expected APY longs:", diode. currentAPY_longs());
+        emit log_named_uint("expected APY shorts:", diode.currentAPY_shorts());
 
         vm.startPrank(address(diode));
         emit log_named_uint("get supply APY Euler:", eulerStrat.getSupplyAPY());
@@ -305,7 +305,6 @@ contract Diode_test is Test {
         //////////////////////////////////////////////////////// 
 
         diode.closePool();
-        diode.setTotalRewardsAndPrice(15 * 10**18, 2100 * 10**9);
 
         //////////////////////////////////////////////////////// 
         //   GET REWARDS
@@ -342,14 +341,11 @@ contract Diode_test is Test {
         emit log_named_uint("user 3 amount:", user3_amount);
         emit log_named_uint("remaining contract balance:", IERC20(diode.suppliedAsset()).balanceOf(address(diode)));
 
-        emit log_named_uint("total longs:", diode.longs());
-        emit log_named_uint("total shorts:", diode.shorts());
+        emit log_named_uint("total longs:", diode.alphaLongs());
+        emit log_named_uint("total shorts:", diode.alphaShorts());
 
 
     }
-
-
-
 
 
 }

@@ -24,6 +24,7 @@ interface IEulerEToken {
 }
 
 contract EulerStrat is Ownable {
+    
 
     using SafeERC20 for IERC20;
 

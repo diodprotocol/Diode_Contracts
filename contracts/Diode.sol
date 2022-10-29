@@ -11,6 +11,11 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 
+    // -----------------
+    //  Interfaces
+    // -----------------
+
+
 interface AggregatorV3Interface {
     function latestRoundData() external view returns (
       uint80 roundId,
@@ -28,7 +33,11 @@ interface IEulerStrat {
     function getSupplyAPY() external returns (uint256);
 }
 
-//TODO: create factory
+    // -----------------
+    //  Contract
+    // -----------------
+
+
 contract Diode is ERC721, Ownable {
 
     using SafeERC20 for IERC20;
@@ -227,7 +236,7 @@ contract Diode is ERC721, Ownable {
              }
 
             amountOwed += tokenToPosition[tokenID].amount;
-            //IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
+            IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
 
             return amountOwed;
 
@@ -255,7 +264,7 @@ contract Diode is ERC721, Ownable {
     }
 
     //TODO: avoir amounts en base 18 toujours
-    function expectedAPY_longs() public returns (uint256 _apy) {
+    function currentAPY_longs() public returns (uint256 _apy) {
 
         if (totalDepositsLONG > 0) {
             uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsLONG;
@@ -265,7 +274,7 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function expectedAPY_shorts() public returns (uint256 _apy) {
+    function currentAPY_shorts() public returns (uint256 _apy) {
 
         if (totalDepositsSHORT > 0) {
             uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsSHORT;
@@ -285,7 +294,7 @@ contract Diode is ERC721, Ownable {
 
         if (_longOrShort == true) {
             if (actualPrice >= strikePrice) {
-                _apy = expectedAPY_longs();
+                _apy = currentAPY_longs();
             } else {
                 _apy = 0;
             } 
@@ -293,18 +302,13 @@ contract Diode is ERC721, Ownable {
 
         if (_longOrShort == false) {
             if (actualPrice < strikePrice) {
-                _apy = expectedAPY_shorts();
+                _apy = currentAPY_shorts();
             } else {
                 _apy = 0;
             }
         }
     }
 
-    function setTotalRewardsAndPrice(uint256 _amount, uint256 _endPrice) public {
-        totalRewards += _amount;
-        endPrice = _endPrice;
-        totalReturnedFromStrat = 0;
-    }
 
 
 }
