@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Diode.sol": {
-      "lastModificationDate": 1666997656493,
-      "contentHash": "057eb3b3f2dbd6cdcad39e0eba3b9ba0",
+      "lastModificationDate": 1667042023684,
+      "contentHash": "4904a254306a3ab14b8724879407b527",
       "sourceName": "contracts/Diode.sol",
       "solcConfig": {
         "settings": {
@@ -57,6 +57,7 @@
         "node_modules/@openzeppelin/contracts/utils/Strings.sol",
         "node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol",
         "node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
         "node_modules/hardhat/console.sol"
       ],
       "versionRequirement": "^0.8.16",
@@ -973,6 +974,44 @@
         }
       }
     },
+    "node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
+      "lastModificationDate": 1666598279931,
+      "contentHash": "fb23b534599db16bb969dc6afcdc4261",
+      "sourceName": "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Math": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "Math.sol/Math.json"
+        }
+      }
+    },
     "node_modules/hardhat/console.sol": {
       "lastModificationDate": 1666598199793,
       "contentHash": "4ff3cd2f6272c9a6516e9ee4f2b967d3",
@@ -1012,8 +1051,8 @@
       }
     },
     "test/foundry/Diode.t.sol": {
-      "lastModificationDate": 1666998324990,
-      "contentHash": "8996bbe9978c943cfd8be81db2c81759",
+      "lastModificationDate": 1667042072601,
+      "contentHash": "1d94f6a37fc77cba4f4cb4bf9ea5f73b",
       "sourceName": "test/foundry/Diode.t.sol",
       "solcConfig": {
         "settings": {
@@ -1065,6 +1104,7 @@
         "node_modules/@openzeppelin/contracts/utils/Strings.sol",
         "node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol",
         "node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
         "node_modules/hardhat/console.sol"
       ],
       "versionRequirement": "^0.8.16",

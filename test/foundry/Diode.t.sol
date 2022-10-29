@@ -80,6 +80,7 @@ contract Diode_test is Test {
             block.timestamp,
             deltaPrice,
             chainlinkPriceFeed,
+            10**17,
             "Diode1",
             "DI1"
         );
@@ -123,7 +124,7 @@ contract Diode_test is Test {
         // +1 hour
         vm.warp(block.timestamp + 1 hours);
 
-        // FTX deposit
+/*         // FTX deposit
         vm.startPrank(FTX);
 
         IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 10 ether);
@@ -133,13 +134,13 @@ contract Diode_test is Test {
          uint256 FTX_standardizedPrice, 
          uint256 FTX_standardizedAmount) = diode.depositFunds(10 ether, true);
 
-        vm.stopPrank();
+        vm.stopPrank(); */
 
         // + 15 days
 
         vm.warp(block.timestamp + 15 days);
 
-        // user1 deposit
+/*         // user1 deposit
         vm.startPrank(user1);
 
         IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 10 ether);
@@ -150,12 +151,43 @@ contract Diode_test is Test {
          uint256 user1_standardizedPrice, 
          uint256 user1_standardizedAmount) = diode.depositFunds(10 ether, true);
 
+        vm.stopPrank(); */
+
+        vm.warp(block.timestamp + 7 days);
+
+        // user2 deposit
+
+        vm.startPrank(user2);
+
+        IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 0.5 ether);
+
+        
+        (uint256 user2_computedPriceRisk,
+         uint256 user2_alpha,
+         uint256 user2_standardizedPrice, 
+         uint256 user2_standardizedAmount) = diode.depositFunds(0.5 ether, true);
+
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + 2 days);
+        // user3 deposit
+
+        vm.startPrank(user3);
+
+        IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 20 ether);
+
+        
+        (uint256 user3_computedPriceRisk,
+         uint256 user3_alpha,
+         uint256 user3_standardizedPrice, 
+         uint256 user3_standardizedAmount) = diode.depositFunds(20 ether, true);
+
         vm.stopPrank();
 
 
         emit log_string("FTX results:");
 
-        emit log_named_uint("computedPriceRisk", FTX_computedPriceRisk);
+/*         emit log_named_uint("computedPriceRisk", FTX_computedPriceRisk);
         emit log_named_uint("alpha:", FTX_alpha);
         emit log_named_uint("standardizedPrice:", FTX_standardizedPrice);
         emit log_named_uint("standardizedAmount:", FTX_standardizedAmount);
@@ -165,7 +197,21 @@ contract Diode_test is Test {
         emit log_named_uint("computedPriceRisk", user1_computedPriceRisk);
         emit log_named_uint("alpha:", user1_alpha);
         emit log_named_uint("standardizedPrice:", user1_standardizedPrice);
-        emit log_named_uint("standardizedAmount:", user1_standardizedAmount);
+        emit log_named_uint("standardizedAmount:", user1_standardizedAmount); */
+
+        emit log_string("user2 results:");
+
+        emit log_named_uint("computedPriceRisk", user2_computedPriceRisk);
+        emit log_named_uint("alpha:", user2_alpha);
+        emit log_named_uint("standardizedPrice:", user2_standardizedPrice);
+        emit log_named_uint("standardizedAmount:", user2_standardizedAmount);
+
+        emit log_string("user3 results:");
+
+        emit log_named_uint("computedPriceRisk", user3_computedPriceRisk);
+        emit log_named_uint("alpha:", user3_alpha);
+        emit log_named_uint("standardizedPrice:", user3_standardizedPrice);
+        emit log_named_uint("standardizedAmount:", user3_standardizedAmount);
 
         emit log_named_address("Owner of token 1:", diode.ownerOf(1));
         emit log_named_address("Owner of token 1:", diode.ownerOf(2));
@@ -254,20 +300,25 @@ contract Diode_test is Test {
         //////////////////////////////////////////////////////// 
 
         diode.closePool();
-        diode.setTotalRewardsAndPrice(32 * 10**18, 2100);
+        diode.setTotalRewardsAndPrice(15 * 10**18, 2100 * 10**9);
 
         //////////////////////////////////////////////////////// 
         //   GET REWARDS
         //////////////////////////////////////////////////////// 
 
         // FTX
+        emit log_string("FTX initial data");
+        emit log_named_uint("total Rewards:", diode.totalRewards());
+        emit log_named_uint("total assets:", diode.totalDeposits());
+
         vm.startPrank(FTX);
         uint256 FTX_amount = diode.getReward(1);
+        IERC20(diode.suppliedAsset()).safeTransfer(address(diode), 15 * 10**18);
         vm.stopPrank();
 
         // user 1
         vm.startPrank(user1);
-        diode.getReward(2);
+        uint256 user1_amount = diode.getReward(2);
         vm.stopPrank();
 
         // user 2
@@ -277,11 +328,14 @@ contract Diode_test is Test {
 
         // user 3
         vm.startPrank(user3);
-        diode.getReward(4);
+        uint256 user3_amount = diode.getReward(4);
         vm.stopPrank();
 
         emit log_named_uint("FTX amount:", FTX_amount);
+        emit log_named_uint("user1 amount:", user1_amount);
         emit log_named_uint("user 2 amount:", user2_amount);
+        emit log_named_uint("user 3 amount:", user3_amount);
+        emit log_named_uint("remaining contract balance:", IERC20(diode.suppliedAsset()).balanceOf(address(diode)));
 
         emit log_named_uint("total longs:", diode.longs());
         emit log_named_uint("total shorts:", diode.shorts());

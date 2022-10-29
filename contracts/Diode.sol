@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/safeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 
 interface AggregatorV3Interface {
@@ -34,6 +35,7 @@ interface IEulerStrat {
 contract Diode is ERC721, Ownable {
 
     using SafeERC20 for IERC20;
+    using Math for uint256;
 
 
     // -----------------
@@ -57,6 +59,7 @@ contract Diode is ERC721, Ownable {
     bool public poolIsClosed;
     uint256 public totalDeposits;
     uint256 public totalReturnedFromStrat;
+    uint256 public withdrawFees;
 
 
     struct UserDeposit {
@@ -91,6 +94,7 @@ contract Diode is ERC721, Ownable {
     uint256 _startTime,
     uint256 _deltaPrice,
     address _chainlinkPriceFeed,
+    uint256 _fees,
     string memory _name,
     string memory _symbol) 
     ERC721(_name, _symbol)
@@ -102,6 +106,7 @@ contract Diode is ERC721, Ownable {
         startTime = _startTime;
         finalTime = _startTime + _duration;
         deltaPrice = _deltaPrice;
+        withdrawFees = _fees;
 
     }
 
@@ -185,7 +190,7 @@ contract Diode is ERC721, Ownable {
         poolIsClosed = true;
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
-        endPrice = uint256(price);
+        endPrice = standardizeBase9Chainlink(uint256(price));
         uint256 returnedAmount = IEulerStrat(eulerStratContract).withdraw();
         if (returnedAmount <= totalDeposits) {
             totalReturnedFromStrat = returnedAmount;
@@ -195,27 +200,36 @@ contract Diode is ERC721, Ownable {
 
     }
 
-    function getReward(uint256 tokenID) external returns (uint256 amountOwedTokenID) {
+    function getReward(uint256 tokenID) external returns (uint256 _amountOwed) {
         require(block.timestamp > finalTime && poolIsClosed == true);
         require(ownerOf(tokenID) == _msgSender(), "user is not Owner of token ID");
 
+        uint256 amountOwed;
+        uint256 alpha;
+        uint256 fees;
+
         if (totalReturnedFromStrat > 0) {
-            amountOwedTokenID = (tokenToPosition[tokenID].amount * totalReturnedFromStrat) / totalDeposits;
-            IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwedTokenID);
+            amountOwed = (tokenToPosition[tokenID].amount * totalReturnedFromStrat) / totalDeposits;
+            IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
         } else {
             if (endPrice >= strikePrice && tokenToPosition[tokenID].longOrShort == true) {
-                uint256 alpha = tokenToPosition[tokenID].alpha;
-                amountOwedTokenID = (totalRewards * alpha) / longs;
+                alpha = tokenToPosition[tokenID].alpha;
+                amountOwed =  totalRewards.mulDiv(alpha, longs, Math.Rounding.Down);
+                fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
+                amountOwed -= fees;
             }
 
             if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
-                uint256 alpha = tokenToPosition[tokenID].alpha;
-                amountOwedTokenID = (totalRewards * alpha) / shorts;
+                alpha = tokenToPosition[tokenID].alpha;
+                amountOwed =  totalRewards.mulDiv(alpha, shorts, Math.Rounding.Down);
+                fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
+                amountOwed -= fees;
              }
 
-            amountOwedTokenID += tokenToPosition[tokenID].amount;
-            IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwedTokenID);
+            amountOwed += tokenToPosition[tokenID].amount;
+            IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
 
+            return amountOwed;
 
         }
     }
@@ -243,6 +257,7 @@ contract Diode is ERC721, Ownable {
     function setTotalRewardsAndPrice(uint256 _amount, uint256 _endPrice) public {
         totalRewards += _amount;
         endPrice = _endPrice;
+        totalReturnedFromStrat = 0;
     }
 
 
