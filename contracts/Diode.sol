@@ -22,13 +22,10 @@ interface AggregatorV3Interface {
     function decimals() external view returns (uint8);
 }
 
-interface IEulerMarkets {
-    function underlyingToEToken(address) external returns (address);
-}
-
 interface IEulerStrat {
     function deposit(address token, uint256 amount) external;
     function withdraw() external returns (uint256);
+    function getSupplyAPY() external returns (uint256);
 }
 
 //TODO: create factory
@@ -60,7 +57,6 @@ contract Diode is ERC721, Ownable {
     uint256 public totalDeposits;
     uint256 public totalReturnedFromStrat;
     uint256 public withdrawFees;
-
 
     struct UserDeposit {
         uint256 amount;
@@ -254,11 +250,48 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function setTotalRewardsAndPrice(uint256 _amount, uint256 _endPrice) public {
+    function expectedAPY_longs() public view returns (uint256 _apy) {
+        uint256 totalSumAlpha = (longs + shorts) * 10**9;
+        uint256 APY_multiplicator = totalSumAlpha/longs;
+        _apy = (IEulerStrat(eulerStratContract).getSupplyAPY(suppliedAsset) / 10**9) * APY_multiplicator;
+
+    }
+
+    function expectedAPY_shorts() public view returns (uint256 _apy) {
+        uint256 totalSumAlpha = (longs + shorts) * 10**9;
+        uint256 APY_multiplicator = totalSumAlpha/shorts;
+        _apy = APY * APY_multiplicator;
+
+    }
+
+    // TODO: should do a preview deposit to check for APY evolution.
+    function actualAPY(bool _longOrShort) public view returns (uint256 _apy) {
+        (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
+        require(price > 0);
+        uint256 actualPrice = standardizeBase9Chainlink(uint256(price));
+
+        if (_longOrShort == true) {
+            if (actualPrice >= strikePrice && longs > 0) {
+                _apy = expectedAPY_longs();
+            } else {
+                _apy = 0;
+            } 
+        }
+
+        if (_longOrShort == false) {
+            if (actualPrice < strikePrice && shorts > 0) {
+                _apy = expectedAPY_shorts();
+            } else {
+                _apy = 0;
+            }
+        }
+    }
+
+/*     function setTotalRewardsAndPrice(uint256 _amount, uint256 _endPrice) public {
         totalRewards += _amount;
         endPrice = _endPrice;
         totalReturnedFromStrat = 0;
-    }
+    } */
 
 
 }

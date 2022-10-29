@@ -13,6 +13,10 @@ interface IEulerMarkets {
     function underlyingToEToken(address) external returns (address);
 }
 
+interface IEulerSimpleLens {
+    function interestRates(address underlying) external returns (uint, uint, uint);
+}
+
 interface IEulerEToken {
     function deposit(uint, uint) external;
     function withdraw(uint, uint) external;
@@ -30,6 +34,7 @@ contract EulerStrat is Ownable {
 
     address EULER_MAINNET = 0x27182842E098f60e3D576794A5bFFb0777E025d3;
     address EULER_MAINNET_MARKETS = 0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3;
+    address EULER_SIMPLELENS = 0x5077B7642abF198b4a5b7C4BdCE4f03016C7089C;
     IEulerMarkets markets = IEulerMarkets(EULER_MAINNET_MARKETS);
 
     address public underlyingToken;
@@ -76,6 +81,10 @@ contract EulerStrat is Ownable {
     function stratBalance() public returns (uint256 totalInvested) {
         IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(underlyingToken));
         totalInvested = eToken.balanceOf(address(this));
+    }
+
+    function getSupplyAPY() external onlyOwner returns (uint256 _apy) {
+        (,,_apy) = IEulerSimpleLens(EULER_SIMPLELENS).interestRates(underlyingToken);
     }
 
 
