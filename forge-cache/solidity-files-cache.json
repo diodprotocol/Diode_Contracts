@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Diode.sol": {
-      "lastModificationDate": 1667042023684,
-      "contentHash": "4904a254306a3ab14b8724879407b527",
+      "lastModificationDate": 1667060590727,
+      "contentHash": "5a8fb59a5926ac8bb154234e6daaf392",
       "sourceName": "contracts/Diode.sol",
       "solcConfig": {
         "settings": {
@@ -68,17 +68,14 @@
         "Diode": {
           "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/Diode.json"
         },
-        "IEulerMarkets": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/IEulerMarkets.json"
-        },
         "IEulerStrat": {
           "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/IEulerStrat.json"
         }
       }
     },
     "contracts/EulerStrat.sol": {
-      "lastModificationDate": 1666996213363,
-      "contentHash": "388d998077f1f91c3417e5aca6b929ec",
+      "lastModificationDate": 1667059679406,
+      "contentHash": "7de3accd7c9abccebd77fba102d6bfd1",
       "sourceName": "contracts/EulerStrat.sol",
       "solcConfig": {
         "settings": {
@@ -126,6 +123,9 @@
         },
         "IEulerMarkets": {
           "0.8.16+commit.07a7930e.Darwin.appleclang": "EulerStrat.sol/IEulerMarkets.json"
+        },
+        "IEulerSimpleLens": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "EulerStrat.sol/IEulerSimpleLens.json"
         }
       }
     },
@@ -1051,8 +1051,8 @@
       }
     },
     "test/foundry/Diode.t.sol": {
-      "lastModificationDate": 1667042072601,
-      "contentHash": "1d94f6a37fc77cba4f4cb4bf9ea5f73b",
+      "lastModificationDate": 1667059903008,
+      "contentHash": "272f6af7829b7c37eb459396b6241f6c",
       "sourceName": "test/foundry/Diode.t.sol",
       "solcConfig": {
         "settings": {

@@ -36,6 +36,8 @@ contract EulerStrat is Ownable {
     address EULER_MAINNET_MARKETS = 0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3;
     address EULER_SIMPLELENS = 0x5077B7642abF198b4a5b7C4BdCE4f03016C7089C;
     IEulerMarkets markets = IEulerMarkets(EULER_MAINNET_MARKETS);
+    // not enough time to calculate APY so hardcoded.
+    uint256 Lido_stETH_APY = 5400000000;
 
     address public underlyingToken;
 
@@ -84,7 +86,16 @@ contract EulerStrat is Ownable {
     }
 
     function getSupplyAPY() external onlyOwner returns (uint256 _apy) {
-        (,,_apy) = IEulerSimpleLens(EULER_SIMPLELENS).interestRates(underlyingToken);
+        (,,_apy) = (IEulerSimpleLens(EULER_SIMPLELENS).interestRates(underlyingToken));
+
+        _apy /= 10**16;
+       
+        // if underlyingToken = Lido stETH add LIDO APY. Hardcoded, not enough time to calculate.
+        if (underlyingToken == 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) {
+            _apy +=  Lido_stETH_APY;
+        }
+
+
     }
 
 

@@ -17,7 +17,8 @@ interface IEulerMarkets {
 }
 
 interface IEulerStrat {
-    function deposit (address token, uint256 amount) external;
+    function deposit(address token, uint256 amount) external;
+    function getSupplyAPY() external returns (uint256);
 }
 
 interface IEulerEToken {
@@ -43,6 +44,7 @@ contract Diode_test is Test {
     // init tokens
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address LidoStETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
+    address WBTC = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599; 
 
     // euler addresses
     address EULER_MAINNET_MARKETS = 0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3;
@@ -67,10 +69,10 @@ contract Diode_test is Test {
 
     function setUp() public {
 
-        uint256 strikePrice = 2000 * 10**9;
+        uint256 strikePrice = 1600 * 10**9;
         uint256 duration = 2629743; // 30.44 days UNIX time
-        uint256 deltaPrice = 500 * 10**9;
-        address chainlinkPriceFeed = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419; // ETH price feed
+        uint256 deltaPrice = 300 * 10**9;
+        address chainlinkPriceFeed = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419; // ETH/USD price feed
 
         //Instantiate new contract instance
         diode = new Diode(
@@ -81,8 +83,8 @@ contract Diode_test is Test {
             deltaPrice,
             chainlinkPriceFeed,
             10**17,
-            "Diode1",
-            "DI1"
+            "Diode_stETH",
+            "DIO1"
         );
 
         //Instantiate new contract instance
@@ -96,11 +98,11 @@ contract Diode_test is Test {
 
     function test_Diode_init() public {
         assertEq(diode.suppliedAsset(),                    0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
-        assertEq(diode.strikePrice(),                      2000 * 10**9);
+        assertEq(diode.strikePrice(),                      1600 * 10**9);
         assertEq(diode.duration(),                         2629743);
         assertEq(diode.chainlinkPriceFeed(),               0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
         assertEq((diode.finalTime() - diode.startTime()),  diode.duration());
-        assertEq(diode.deltaPrice(),                       500 * 10**9);
+        assertEq(diode.deltaPrice(),                       300 * 10**9);
 
         withinDiff(diode.startTime(),                      block.timestamp, 100);
 
@@ -124,7 +126,7 @@ contract Diode_test is Test {
         // +1 hour
         vm.warp(block.timestamp + 1 hours);
 
-/*         // FTX deposit
+        // FTX deposit
         vm.startPrank(FTX);
 
         IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 10 ether);
@@ -132,9 +134,9 @@ contract Diode_test is Test {
         (uint256 FTX_computedPriceRisk,
          uint256 FTX_alpha,
          uint256 FTX_standardizedPrice, 
-         uint256 FTX_standardizedAmount) = diode.depositFunds(10 ether, true);
+         uint256 FTX_standardizedAmount) = diode.depositFunds(10 ether, false);
 
-        vm.stopPrank(); */
+        vm.stopPrank();
 
         // + 15 days
 
@@ -157,7 +159,7 @@ contract Diode_test is Test {
 
         // user2 deposit
 
-        vm.startPrank(user2);
+/*         vm.startPrank(user2);
 
         IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 0.5 ether);
 
@@ -167,7 +169,7 @@ contract Diode_test is Test {
          uint256 user2_standardizedPrice, 
          uint256 user2_standardizedAmount) = diode.depositFunds(0.5 ether, true);
 
-        vm.stopPrank();
+        vm.stopPrank(); */
 
         vm.warp(block.timestamp + 2 days);
         // user3 deposit
@@ -175,7 +177,6 @@ contract Diode_test is Test {
         vm.startPrank(user3);
 
         IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 20 ether);
-
         
         (uint256 user3_computedPriceRisk,
          uint256 user3_alpha,
@@ -187,24 +188,24 @@ contract Diode_test is Test {
 
         emit log_string("FTX results:");
 
-/*         emit log_named_uint("computedPriceRisk", FTX_computedPriceRisk);
+        emit log_named_uint("computedPriceRisk", FTX_computedPriceRisk);
         emit log_named_uint("alpha:", FTX_alpha);
         emit log_named_uint("standardizedPrice:", FTX_standardizedPrice);
         emit log_named_uint("standardizedAmount:", FTX_standardizedAmount);
 
-        emit log_string("user1 results:");
+/*         emit log_string("user1 results:");
 
         emit log_named_uint("computedPriceRisk", user1_computedPriceRisk);
         emit log_named_uint("alpha:", user1_alpha);
         emit log_named_uint("standardizedPrice:", user1_standardizedPrice);
         emit log_named_uint("standardizedAmount:", user1_standardizedAmount); */
 
-        emit log_string("user2 results:");
+/*         emit log_string("user2 results:");
 
         emit log_named_uint("computedPriceRisk", user2_computedPriceRisk);
         emit log_named_uint("alpha:", user2_alpha);
         emit log_named_uint("standardizedPrice:", user2_standardizedPrice);
-        emit log_named_uint("standardizedAmount:", user2_standardizedAmount);
+        emit log_named_uint("standardizedAmount:", user2_standardizedAmount); */
 
         emit log_string("user3 results:");
 
@@ -218,7 +219,11 @@ contract Diode_test is Test {
 
         emit log_named_uint("Euler Strat Balance before:", eulerStrat.stratBalance());
 
+        emit log_named_uint("expected APY longs:", diode.expectedAPY_longs());
+        emit log_named_uint("expected APY shorts:", diode.expectedAPY_shorts());
+
         vm.startPrank(address(diode));
+        emit log_named_uint("get supply APY Euler:", eulerStrat.getSupplyAPY());
         eulerStrat.withdraw();
         vm.stopPrank();
 

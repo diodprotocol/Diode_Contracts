@@ -46,15 +46,17 @@ contract Diode is ERC721, Ownable {
     uint256 public startTime;
     uint256 public finalTime;
     uint256 public duration;
-    uint256 public longs;
-    uint256 public shorts;
+    uint256 public alphaLongs;
+    uint256 public alphaShorts;
     uint256 public deltaPrice;
     uint256 public endPrice;
     uint256 public totalRewards;
     uint256 public tokenCount;
-    address private eulerStratContract;
+    address private stratContract;
     bool public poolIsClosed;
     uint256 public totalDeposits;
+    uint256 public totalDepositsLONG;
+    uint256 public totalDepositsSHORT;
     uint256 public totalReturnedFromStrat;
     uint256 public withdrawFees;
 
@@ -114,7 +116,7 @@ contract Diode is ERC721, Ownable {
 
     function setStrategy(address _strat) external onlyOwner {
 
-        eulerStratContract = _strat;
+        stratContract = _strat;
 
     }
 
@@ -146,15 +148,17 @@ contract Diode is ERC721, Ownable {
         d.alpha = alpha;
 
         if (longShort == true) {
-            longs += alpha;
+            alphaLongs += alpha;
+            totalDepositsLONG += amount;
         } else if (longShort == false) {
-            shorts += alpha;
+            alphaShorts += alpha;
+            totalDepositsSHORT += amount;
         }
 
         //TODO: ask why issue when replacing with "amount" below (stack too deep error)
         IERC20(suppliedAsset).safeTransferFrom(_msgSender(), address(this), standardizedAmount * 10**9);
-        IERC20(suppliedAsset).safeApprove(eulerStratContract, standardizedAmount * 10**9);
-        IEulerStrat(eulerStratContract).deposit(suppliedAsset, standardizedAmount * 10**9);
+        IERC20(suppliedAsset).safeApprove(stratContract, standardizedAmount * 10**9);
+        IEulerStrat(stratContract).deposit(suppliedAsset, standardizedAmount * 10**9);
         _safeMint(_msgSender(), newTokenID);
 
         return (computedPriceRisk, alpha, standardizedPrice, standardizedAmount);
@@ -187,7 +191,7 @@ contract Diode is ERC721, Ownable {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         endPrice = standardizeBase9Chainlink(uint256(price));
-        uint256 returnedAmount = IEulerStrat(eulerStratContract).withdraw();
+        uint256 returnedAmount = IEulerStrat(stratContract).withdraw();
         if (returnedAmount <= totalDeposits) {
             totalReturnedFromStrat = returnedAmount;
         } else if (returnedAmount > totalDeposits) {
@@ -210,20 +214,20 @@ contract Diode is ERC721, Ownable {
         } else {
             if (endPrice >= strikePrice && tokenToPosition[tokenID].longOrShort == true) {
                 alpha = tokenToPosition[tokenID].alpha;
-                amountOwed =  totalRewards.mulDiv(alpha, longs, Math.Rounding.Down);
+                amountOwed =  totalRewards.mulDiv(alpha, alphaLongs, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
                 amountOwed -= fees;
             }
 
             if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
                 alpha = tokenToPosition[tokenID].alpha;
-                amountOwed =  totalRewards.mulDiv(alpha, shorts, Math.Rounding.Down);
+                amountOwed =  totalRewards.mulDiv(alpha, alphaShorts, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
                 amountOwed -= fees;
              }
 
             amountOwed += tokenToPosition[tokenID].amount;
-            IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
+            //IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
 
             return amountOwed;
 
@@ -250,28 +254,37 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function expectedAPY_longs() public view returns (uint256 _apy) {
-        uint256 totalSumAlpha = (longs + shorts) * 10**9;
-        uint256 APY_multiplicator = totalSumAlpha/longs;
-        _apy = (IEulerStrat(eulerStratContract).getSupplyAPY(suppliedAsset) / 10**9) * APY_multiplicator;
+    //TODO: avoir amounts en base 18 toujours
+    function expectedAPY_longs() public returns (uint256 _apy) {
 
+        if (totalDepositsLONG > 0) {
+            uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsLONG;
+            _apy = IEulerStrat(stratContract).getSupplyAPY() * APY_multiplicator;
+        } else {
+            _apy = 0;
+        }
     }
 
-    function expectedAPY_shorts() public view returns (uint256 _apy) {
-        uint256 totalSumAlpha = (longs + shorts) * 10**9;
-        uint256 APY_multiplicator = totalSumAlpha/shorts;
-        _apy = APY * APY_multiplicator;
+    function expectedAPY_shorts() public returns (uint256 _apy) {
+
+        if (totalDepositsSHORT > 0) {
+            uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsSHORT;
+            _apy = IEulerStrat(stratContract).getSupplyAPY() * APY_multiplicator;
+        } else {
+            _apy = 0;
+        }
+
 
     }
 
     // TODO: should do a preview deposit to check for APY evolution.
-    function actualAPY(bool _longOrShort) public view returns (uint256 _apy) {
+    function actualAPY(bool _longOrShort) public returns (uint256 _apy) {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         uint256 actualPrice = standardizeBase9Chainlink(uint256(price));
 
         if (_longOrShort == true) {
-            if (actualPrice >= strikePrice && longs > 0) {
+            if (actualPrice >= strikePrice) {
                 _apy = expectedAPY_longs();
             } else {
                 _apy = 0;
@@ -279,7 +292,7 @@ contract Diode is ERC721, Ownable {
         }
 
         if (_longOrShort == false) {
-            if (actualPrice < strikePrice && shorts > 0) {
+            if (actualPrice < strikePrice) {
                 _apy = expectedAPY_shorts();
             } else {
                 _apy = 0;
@@ -287,11 +300,11 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-/*     function setTotalRewardsAndPrice(uint256 _amount, uint256 _endPrice) public {
+    function setTotalRewardsAndPrice(uint256 _amount, uint256 _endPrice) public {
         totalRewards += _amount;
         endPrice = _endPrice;
         totalReturnedFromStrat = 0;
-    } */
+    }
 
 
 }
