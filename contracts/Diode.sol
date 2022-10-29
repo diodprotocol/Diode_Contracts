@@ -114,6 +114,7 @@ contract Diode is ERC721, Ownable {
         finalTime = _startTime + _duration;
         deltaPrice = _deltaPrice;
         withdrawFees = _fees;
+        transferOwnership(tx.origin);
 
     }
 
@@ -262,7 +263,6 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    //TODO: avoir amounts en base 18 toujours
     function currentAPY_longs() public returns (uint256 _apy) {
 
         if (totalDepositsLONG > 0) {
@@ -283,7 +283,6 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    // TODO: should do a preview deposit to check for APY evolution.
     function actualAPY(bool _longOrShort) public returns (uint256 _apy) {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);

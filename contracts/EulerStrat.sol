@@ -118,8 +118,6 @@ contract EulerStrat is Ownable {
         if (underlyingToken == USDT_Goerli) {
             _apy +=  USDT_APY;
         }
-
-
     }
 
 
