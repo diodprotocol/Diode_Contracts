@@ -30,7 +30,7 @@ interface AggregatorV3Interface {
 interface IEulerStrat {
     function deposit(address token, uint256 amount) external;
     function withdraw() external returns (uint256);
-    function getSupplyAPY() external returns (uint256);
+    function getSupplyAPY() external view returns (uint256);
 }
 
     // -----------------
@@ -61,13 +61,14 @@ contract Diode is ERC721, Ownable {
     uint256 public endPrice;
     uint256 public totalRewards;
     uint256 public tokenCount;
-    address private stratContract;
+    address public stratContract;
     bool public poolIsClosed;
     uint256 public totalDeposits;
     uint256 public totalDepositsLONG;
     uint256 public totalDepositsSHORT;
     uint256 public totalReturnedFromStrat;
     uint256 public withdrawFees;
+    bool public strategyActivated;
 
     struct UserDeposit {
         uint256 amount;
@@ -124,8 +125,9 @@ contract Diode is ERC721, Ownable {
     // -----------------
 
 
-    function setStrategy(address _strat) external onlyOwner {
-
+    function setStrategy(address _strat) external {
+        require(strategyActivated == false);
+        strategyActivated = true;
         stratContract = _strat;
 
     }
@@ -263,7 +265,7 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function currentAPY_longs() public returns (uint256 _apy) {
+    function currentAPY_longs() public view returns (uint256 _apy) {
 
         if (totalDepositsLONG > 0) {
             uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsLONG;
@@ -273,7 +275,7 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function currentAPY_shorts() public returns (uint256 _apy) {
+    function currentAPY_shorts() public view returns (uint256 _apy) {
 
         if (totalDepositsSHORT > 0) {
             uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsSHORT;
@@ -283,7 +285,7 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function actualAPY(bool _longOrShort) public returns (uint256 _apy) {
+    function actualAPY(bool _longOrShort) public view returns (uint256 _apy) {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         uint256 actualPrice = standardizeBase9Chainlink(uint256(price));

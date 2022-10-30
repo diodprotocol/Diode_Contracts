@@ -99,10 +99,12 @@ contract EulerStrat is Ownable {
         uint256 Lido_stETH_APY = 5400000000;
         uint256 WBTC_APY = 2888888888;
         uint256 USDT_APY = 3410000000;
+        uint256 WETH_APY = 1900000000;
 
         address Lido_stETH_Goerli = 0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F;
         address WBTC_Goerli = 0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05;
         address USDT_Goerli = 0xe583769738b6dd4E7CAF8451050d1948BE717679;
+        address WETH_Goerli = 0xa3401DFdBd584E918f59fD1C3a558467E373DacC;
 
        
         // if underlyingToken = Lido stETH add LIDO APY. Hardcoded, not enough time to calculate.
@@ -110,13 +112,19 @@ contract EulerStrat is Ownable {
             _apy +=  Lido_stETH_APY;
         }
 
-        // if underlyingToken = Lido stETH add LIDO APY. Hardcoded, not enough time to calculate.
+        // if underlyingToken = WBTC add LIDO APY. Hardcoded, not enough time to calculate.
         if (underlyingToken == WBTC_Goerli) {
             _apy +=  WBTC_APY;
         }
 
+        // if underlyingToken = USDT add LIDO APY. Hardcoded, not enough time to calculate.
         if (underlyingToken == USDT_Goerli) {
             _apy +=  USDT_APY;
+        }
+
+        // if underlyingToken = WETH add LIDO APY. Hardcoded, not enough time to calculate.
+        if (underlyingToken == WETH_Goerli) {
+            _apy += WETH_APY;
         }
     }
 
