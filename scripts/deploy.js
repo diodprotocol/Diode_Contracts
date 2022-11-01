@@ -10,7 +10,7 @@ const hre = require("hardhat");
 async function main() {
 
   const DiodeFactory = await hre.ethers.getContractFactory("DiodeFactory");
-  const diodeFactory = await DiodeFactory.deploy();
+  const diodeFactory = await DiodeFactory.deploy({nonce: 38});
 
   await diodeFactory.deployed();
 
