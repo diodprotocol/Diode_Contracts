@@ -48,31 +48,33 @@ contract Diode is ERC721, Ownable {
     //  State Variables
     // -----------------
 
-
-    address public suppliedAsset;
-    uint256 public strikePrice;
-    address public chainlinkPriceFeed;
     uint256 public startTime;
     uint256 public finalTime;
     uint256 public duration;
     uint256 public alphaLongs;
     uint256 public alphaShorts;
-    uint256 public deltaPrice;
     uint256 public endPrice;
     uint256 public totalRewards;
     uint256 public tokenCount;
-    address public stratContract;
-    bool public poolIsClosed;
     uint256 public totalDeposits;
     uint256 public totalDepositsLONG;
     uint256 public totalDepositsSHORT;
     uint256 public totalReturnedFromStrat;
     uint256 public withdrawFees;
+
+    // Base 9
+    uint256 public strikePrice;
+    uint256 public deltaPrice;
+
+    address public stratContract;
+    address public suppliedAsset;
+    address public chainlinkPriceFeed;
+
+    bool public poolIsClosed;   
     bool public strategyActivated;
 
     struct UserDeposit {
         uint256 amount;
-        uint256 timeStamp;
         // 9 decimals for assetPrice
         uint256 assetPrice;
         bool longOrShort;
@@ -96,16 +98,17 @@ contract Diode is ERC721, Ownable {
     /// @param _chainlinkPriceFeed  contract address of the chainlink price feed for supplied asset.
 
     constructor(
-    uint256 _strikePrice, 
-    address _asset,
-    uint256 _duration,
-    uint256 _startTime,
-    uint256 _deltaPrice,
-    address _chainlinkPriceFeed,
-    uint256 _fees,
-    string memory _name,
-    string memory _symbol) 
-    ERC721(_name, _symbol)
+        uint256 _strikePrice, 
+        address _asset,
+        uint256 _duration,
+        uint256 _startTime,
+        uint256 _deltaPrice,
+        address _chainlinkPriceFeed,
+        uint256 _fees,
+        string memory _name,
+        string memory _symbol
+    ) 
+        ERC721(_name, _symbol)
     {
         suppliedAsset = _asset;
         strikePrice = _strikePrice;
@@ -116,7 +119,6 @@ contract Diode is ERC721, Ownable {
         deltaPrice = _deltaPrice;
         withdrawFees = _fees;
         transferOwnership(tx.origin);
-
     }
 
 
@@ -129,15 +131,15 @@ contract Diode is ERC721, Ownable {
         require(strategyActivated == false);
         strategyActivated = true;
         stratContract = _strat;
-
     }
 
     function depositFunds(uint256 amount, bool longShort) public returns (
         uint256 _computedRisk, 
         uint256 _alpha, 
         uint256 _standardizedPrice, 
-        uint256 _standardizedAmount) {
-        ///TODO: invest() in strategy (should call separate contract)
+        uint256 _standardizedAmount
+    ) 
+    {
         require(block.timestamp >= startTime);
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
@@ -154,7 +156,6 @@ contract Diode is ERC721, Ownable {
         UserDeposit storage d = tokenToPosition[newTokenID];
 
         d.amount = amount;
-        d.timeStamp = block.timestamp;
         d.assetPrice = standardizedPrice;
         d.longOrShort = longShort;
         d.alpha = alpha;
@@ -225,14 +226,14 @@ contract Diode is ERC721, Ownable {
             IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
         } else {
             if (endPrice >= strikePrice && tokenToPosition[tokenID].longOrShort == true) {
-                alpha = tokenToPosition[tokenID].alpha;
+                alpha = tokenToPosition[tokenID].alpha / 10**9;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaLongs, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
                 amountOwed -= fees;
             }
 
             if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
-                alpha = tokenToPosition[tokenID].alpha;
+                alpha = tokenToPosition[tokenID].alpha / 10**9;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaShorts, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
                 amountOwed -= fees;
@@ -259,7 +260,7 @@ contract Diode is ERC721, Ownable {
         standardizedAmount = amount;
         
         if (IERC20Metadata(asset).decimals() < 9) {
-            standardizedAmount *= 10 ** (18 - IERC20Metadata(asset).decimals());
+            standardizedAmount *= 10 ** (9 - IERC20Metadata(asset).decimals());
         } else if (IERC20Metadata(asset).decimals() > 9) {
             standardizedAmount /= 10 ** (IERC20Metadata(asset).decimals() - 9);
         }
@@ -268,8 +269,9 @@ contract Diode is ERC721, Ownable {
     function currentAPY_longs() public view returns (uint256 _apy) {
 
         if (totalDepositsLONG > 0) {
-            uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsLONG;
-            _apy = IEulerStrat(stratContract).getSupplyAPY() * APY_multiplicator;
+            uint256 APY_multiplicator = (totalDeposits * 10** IERC20Metadata(suppliedAsset).decimals()) / totalDepositsLONG;
+            uint256 standardizedMultiplicator = standardizeBase9(APY_multiplicator, suppliedAsset);
+            _apy = IEulerStrat(stratContract).getSupplyAPY() * standardizedMultiplicator;
         } else {
             _apy = 0;
         }
@@ -278,8 +280,9 @@ contract Diode is ERC721, Ownable {
     function currentAPY_shorts() public view returns (uint256 _apy) {
 
         if (totalDepositsSHORT > 0) {
-            uint256 APY_multiplicator = (totalDeposits * 10**9) / totalDepositsSHORT;
-            _apy = IEulerStrat(stratContract).getSupplyAPY() * APY_multiplicator;
+            uint256 APY_multiplicator = (totalDeposits * 10** IERC20Metadata(suppliedAsset).decimals()) / totalDepositsSHORT;
+            uint256 standardizedMultiplicator = standardizeBase9(APY_multiplicator, suppliedAsset);
+            _apy = IEulerStrat(stratContract).getSupplyAPY() * standardizedMultiplicator;
         } else {
             _apy = 0;
         }
@@ -306,7 +309,4 @@ contract Diode is ERC721, Ownable {
             }
         }
     }
-
-
-
 }

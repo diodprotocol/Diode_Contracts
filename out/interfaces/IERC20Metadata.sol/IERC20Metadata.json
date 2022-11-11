@@ -10,20 +10,20 @@
   },
   "ast": {
     "absolutePath": "node_modules/@openzeppelin/contracts/interfaces/IERC20Metadata.sol",
-    "id": 23310,
+    "id": 23327,
     "exportedSymbols": {
       "IERC20": [
-        23387
+        23404
       ],
       "IERC20Metadata": [
-        23412
+        23429
       ]
     },
     "nodeType": "SourceUnit",
     "src": "98:80:12",
     "nodes": [
       {
-        "id": 23308,
+        "id": 23325,
         "nodeType": "PragmaDirective",
         "src": "98:23:12",
         "literals": [
@@ -34,14 +34,14 @@
         ]
       },
       {
-        "id": 23309,
+        "id": 23326,
         "nodeType": "ImportDirective",
         "src": "123:54:12",
         "absolutePath": "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
         "file": "../token/ERC20/extensions/IERC20Metadata.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 23310,
-        "sourceUnit": 23413,
+        "scope": 23327,
+        "sourceUnit": 23430,
         "symbolAliases": [],
         "unitAlias": ""
       }

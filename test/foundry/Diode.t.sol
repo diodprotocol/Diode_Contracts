@@ -39,7 +39,7 @@ contract Diode_test is Test {
     address FTX = 0x2FAF487A4414Fe77e2327F0bf4AE2a264a776AD2; // 
     address user1 = 0x1c1cc870115FDf86288cf38556c4da441699A0E2; // 30 stETH
     address user2 = 0x5ee50C69028CC6121982d6bf1aBf95ED10D57D15; // 1 stETH
-    address user3 = 0x3f60008Dfd0EfC03F476D9B489D6C5B13B3eBF2C; // 80 stETH
+    address user3 = 0x11fdBcf4FCD2AAc2397B7F7858877e2351C9b1E3; // 32 stETH
 
     // init tokens
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -215,11 +215,11 @@ contract Diode_test is Test {
         emit log_named_uint("standardizedAmount:", user3_standardizedAmount);
 
         emit log_named_address("Owner of token 1:", diode.ownerOf(1));
-        emit log_named_address("Owner of token 1:", diode.ownerOf(2));
+        emit log_named_address("Owner of token 2:", diode.ownerOf(2));
 
         emit log_named_uint("Euler Strat Balance before:", eulerStrat.stratBalance());
 
-        emit log_named_uint("expected APY longs:", diode. currentAPY_longs());
+        emit log_named_uint("expected APY longs:", diode.currentAPY_longs());
         emit log_named_uint("expected APY shorts:", diode.currentAPY_shorts());
 
         vm.startPrank(address(diode));

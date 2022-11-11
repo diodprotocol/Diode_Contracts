@@ -54,7 +54,10 @@ contract DiodeFactory {
         uint256 _fees,
         string memory _name,
         string memory _symbol
-    ) external returns (address deployedPool) {
+    ) 
+    external 
+    returns (address deployedPool)
+    {
   
         deployedPool = address(new Diode(
             _strikePrice,
