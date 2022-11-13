@@ -61,6 +61,7 @@ contract Diode is ERC721, Ownable {
     uint256 public totalDepositsSHORT;
     uint256 public totalReturnedFromStrat;
     uint256 public withdrawFees;
+    uint256[2] public capLongShort;
 
     // Base 9
     uint256 public strikePrice;
@@ -106,7 +107,8 @@ contract Diode is ERC721, Ownable {
         address _chainlinkPriceFeed,
         uint256 _fees,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        uint256[2] memory _capLongShort
     ) 
         ERC721(_name, _symbol)
     {
@@ -118,6 +120,7 @@ contract Diode is ERC721, Ownable {
         finalTime = _startTime + _duration;
         deltaPrice = _deltaPrice;
         withdrawFees = _fees;
+        capLongShort = _capLongShort;
         transferOwnership(tx.origin);
     }
 
@@ -141,6 +144,11 @@ contract Diode is ERC721, Ownable {
     ) 
     {
         require(block.timestamp >= startTime);
+        if (longShort == true) {
+            require(totalDepositsLONG + amount <= capLongShort[0]);
+        } else {
+            require(totalDepositsSHORT + amount <= capLongShort[1]);
+        }
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         totalDeposits += amount;
