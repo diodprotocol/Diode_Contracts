@@ -95,7 +95,7 @@ contract EulerStrat is Ownable {
 
         address WBTC_Goerli = 0xc49BB678a4d822f7F141D5bb4585d44cCe51e25E;
         address USDT_Goerli = 0x7594a0368F18e666480Ad897612f28ad17435B4C;
-        address WETH_Goerli = 0xa3401DFdBd584E918f59fD1C3a558467E373DacC;
+        address WETH_Goerli = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
 
 
         // if underlyingToken = WBTC add WBTC APY. Hardcoded, not enough time to calculate.
