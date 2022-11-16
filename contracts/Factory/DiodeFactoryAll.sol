@@ -2,7 +2,14 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
-import "./Diode.sol";
+import "../Diode.sol";
+import "../Strategies/EulerStrat.sol";
+
+    // ============================ Interfaces ========================
+
+    interface IDiodePool {
+        function setStrategy(address) external;
+    }
 
 
     // ============================ Contract ==========================
@@ -11,7 +18,7 @@ import "./Diode.sol";
 /// @title Diode protocol Pool Factory
 /// @author Diode Protocol core team 
 
-contract DiodeFactory {
+contract DiodeFactoryAll {
 
 
     // ============================ Events ==========================
@@ -29,11 +36,20 @@ contract DiodeFactory {
         string  _symbol
     );
 
+    event NewEulerStrat(
+        address _underlyingToken,
+        address _pool
+    );
+
 
     // ============================ State Variables ==========================
 
     /// @notice List of all Diode Pools contract addresses
     address[] public diodePoolsList;
+
+    /// @notice List of Euler Strategy addresses
+    address[] public eulerStratList;
+
 
     // ============================ Constructor ==========================
 
@@ -42,8 +58,7 @@ contract DiodeFactory {
 
     // ============================ Functions ==========================
 
-    /// @notice Deploys a Diode Pool for `asset` with withdrawal fees of `fees` and a vesting period of
-    /// `vestingPeriod`
+    /// @notice Deploys a Diode Pool and links an Euler strategy to the pool.
     function deployDiodePool(
         uint256 _strikePrice, 
         address _asset,
@@ -54,10 +69,7 @@ contract DiodeFactory {
         uint256 _fees,
         string memory _name,
         string memory _symbol
-    ) 
-    external 
-    returns (address deployedPool)
-    {
+    ) external returns (address deployedPool, address deployedEulerStrat) {
   
         deployedPool = address(new Diode(
             _strikePrice,
@@ -73,9 +85,18 @@ contract DiodeFactory {
 
         diodePoolsList.push(deployedPool);
         emit NewDiodePool(_strikePrice, _asset, _duration, _startTime, _deltaPrice, _chainlinkPriceFeed, _fees, _name, _symbol);
+
+        deployedEulerStrat = address(new EulerStrat(
+            _asset,
+            deployedPool
+        ));
+
+        eulerStratList.push(deployedEulerStrat);
+        emit NewEulerStrat(_asset, deployedPool);
+
+        IDiodePool(deployedPool).setStrategy(deployedEulerStrat);
+
     }
-
-
 
     // ============================ View Functions ==========================
 
@@ -87,5 +108,10 @@ contract DiodeFactory {
     }
 
 
+    /// @notice Returns all the Diode Pools
+    /// @dev Helper for UIs
+    function getAllEulerStrats() external view returns (address[] memory) {
+        return eulerStratList;
+    }
 
 }

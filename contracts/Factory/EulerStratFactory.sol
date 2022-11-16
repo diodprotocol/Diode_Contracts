@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
-import "./EulerStrat.sol";
+import "../Strategies/EulerStrat.sol";
 
 
     // ============================ Contract ==========================
