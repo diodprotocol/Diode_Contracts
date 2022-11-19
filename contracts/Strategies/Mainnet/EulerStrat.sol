@@ -80,7 +80,6 @@ contract EulerStrat is Ownable {
         totalInvested = eToken.balanceOf(address(this));
     }
 
-
     function getSupplyAPY() external view onlyOwner returns (uint256 _apy) {
         (,,_apy) = (IEulerSimpleLens(EULER_SIMPLELENS_MAINNET).interestRates(underlyingToken));
 

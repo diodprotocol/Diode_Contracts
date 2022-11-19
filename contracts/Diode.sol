@@ -51,8 +51,6 @@ contract Diode is ERC721, Ownable {
     uint256 public startTime;
     uint256 public finalTime;
     uint256 public duration;
-    uint256 public alphaLongs;
-    uint256 public alphaShorts;
     uint256 public endPrice;
     uint256 public totalRewards;
     uint256 public tokenCount;
@@ -63,7 +61,11 @@ contract Diode is ERC721, Ownable {
     /// @dev in BIPS
     uint256 public withdrawFees;
 
-    // Base 9
+    /// @dev Base 18 variables
+    uint256 public alphaLongs;
+    uint256 public alphaShorts;
+
+    /// @dev Base 9 variables
     uint256 public strikePrice;
     uint256 public deltaPrice;
 
@@ -111,6 +113,7 @@ contract Diode is ERC721, Ownable {
     ) 
         ERC721(_name, _symbol)
     {
+        require(_fees <= 4000, "Max fee is 40%");
         suppliedAsset = _asset;
         strikePrice = _strikePrice;
         chainlinkPriceFeed = _chainlinkPriceFeed;
@@ -227,14 +230,14 @@ contract Diode is ERC721, Ownable {
             IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
         } else {
             if (endPrice >= strikePrice && tokenToPosition[tokenID].longOrShort == true) {
-                alpha = tokenToPosition[tokenID].alpha / 10**9;
+                alpha = tokenToPosition[tokenID].alpha;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaLongs, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
             }
 
             if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
-                alpha = tokenToPosition[tokenID].alpha / 10**9;
+                alpha = tokenToPosition[tokenID].alpha;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaShorts, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
@@ -267,46 +270,45 @@ contract Diode is ERC721, Ownable {
         }
     }
 
-    function currentAPY_longs() public view returns (uint256 _apy) {
+    function apyBoosterLong() public view returns (uint256 standardizedMultiplicator) {
 
         if (totalDepositsLONG > 0) {
             uint256 APY_multiplicator = (totalDeposits * 10** IERC20Metadata(suppliedAsset).decimals()) / totalDepositsLONG;
-            uint256 standardizedMultiplicator = standardizeBase9(APY_multiplicator, suppliedAsset);
-            _apy = IEulerStrat(stratContract).getSupplyAPY() * standardizedMultiplicator;
+            standardizedMultiplicator = standardizeBase9(APY_multiplicator, suppliedAsset);
+            
         } else {
-            _apy = 0;
+            standardizedMultiplicator = 0;
         }
     }
 
-    function currentAPY_shorts() public view returns (uint256 _apy) {
+    function apyBoosterShort() public view returns (uint256 standardizedMultiplicator) {
 
         if (totalDepositsSHORT > 0) {
             uint256 APY_multiplicator = (totalDeposits * 10** IERC20Metadata(suppliedAsset).decimals()) / totalDepositsSHORT;
-            uint256 standardizedMultiplicator = standardizeBase9(APY_multiplicator, suppliedAsset);
-            _apy = IEulerStrat(stratContract).getSupplyAPY() * standardizedMultiplicator;
+            standardizedMultiplicator = standardizeBase9(APY_multiplicator, suppliedAsset);
         } else {
-            _apy = 0;
+            standardizedMultiplicator = 0;
         }
     }
 
-    function actualAPY(bool _longOrShort) public view returns (uint256 _apy) {
+    function actualAPYBooster(bool _longOrShort) public view returns (uint256 apyMultiplicator) {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         uint256 actualPrice = standardizeBase9Chainlink(uint256(price));
 
         if (_longOrShort == true) {
             if (actualPrice >= strikePrice) {
-                _apy = currentAPY_longs();
+                apyMultiplicator = apyBoosterLong();
             } else {
-                _apy = 0;
+                apyMultiplicator = 0;
             } 
         }
 
         if (_longOrShort == false) {
             if (actualPrice < strikePrice) {
-                _apy = currentAPY_shorts();
+                apyMultiplicator = apyBoosterShort();
             } else {
-                _apy = 0;
+                apyMultiplicator = 0;
             }
         }
     }
