@@ -2,8 +2,8 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
-import "./Diode.sol";
-import "./EulerStrat.sol";
+import "../Diode.sol";
+import "../Strategies/Mainnet/EulerStrat.sol";
 
     // ============================ Interfaces ========================
 

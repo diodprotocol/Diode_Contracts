@@ -60,6 +60,7 @@ contract Diode is ERC721, Ownable {
     uint256 public totalDepositsLONG;
     uint256 public totalDepositsSHORT;
     uint256 public totalReturnedFromStrat;
+    /// @dev in BIPS
     uint256 public withdrawFees;
 
     // Base 9
@@ -228,14 +229,14 @@ contract Diode is ERC721, Ownable {
             if (endPrice >= strikePrice && tokenToPosition[tokenID].longOrShort == true) {
                 alpha = tokenToPosition[tokenID].alpha / 10**9;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaLongs, Math.Rounding.Down);
-                fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
+                fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
             }
 
             if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
                 alpha = tokenToPosition[tokenID].alpha / 10**9;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaShorts, Math.Rounding.Down);
-                fees = amountOwed.mulDiv(withdrawFees, 10**18, Math.Rounding.Up);
+                fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
              }
 
