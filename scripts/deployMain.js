@@ -10,13 +10,13 @@ const hre = require("hardhat");
 async function main() {
 
   console.log("Hello");
-  const DiodeFactoryTurf = await hre.ethers.getContractFactory("DiodeFactoryAll");
+  const DiodeFactoryMainnet = await hre.ethers.getContractFactory("DiodeFactoryMainnet");
   console.log("Hello");
-  const diodeFactoryTurf = await DiodeFactoryTurf.deploy();
-  console.log(diodeFactoryTurf);
-  await diodeFactoryTurf.deployed();
+  const diodeFactoryMainnet = await DiodeFactoryMainnet.deploy();
+  console.log(diodeFactoryMainnet);
+  await diodeFactoryMainnet.deployed();
   console.log("Hello");
-  console.log("diodeFactoryTurf deployed to", diodeFactoryTurf.address); 
+  console.log("diodeFactoryMainnet deployed to", diodeFactoryMainnet.address); 
 
 }
 

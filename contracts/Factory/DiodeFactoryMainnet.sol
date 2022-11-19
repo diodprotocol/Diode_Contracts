@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import "../Diode.sol";
-import "../Strategies/EulerStrat.sol";
+import "../Strategies/Mainnet/EulerStrat.sol";
 
     // ============================ Interfaces ========================
 
@@ -15,10 +15,10 @@ import "../Strategies/EulerStrat.sol";
     // ============================ Contract ==========================
 
 
-/// @title Diode protocol Pool Factory
+/// @title Diode protocol Pool Factory for Mainnet
 /// @author Diode Protocol core team 
 
-contract DiodeFactoryAll {
+contract DiodeFactoryMainnet {
 
 
     // ============================ Events ==========================
