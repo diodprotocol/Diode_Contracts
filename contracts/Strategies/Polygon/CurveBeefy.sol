@@ -96,8 +96,10 @@ contract CurveBeefy is Ownable {
 
     function withdraw() external onlyOwner returns (uint256 returnedAmount) {
         IBeefyVault(beefyVault).withdrawAll();
-        returnedAmount = ICRVPlainPool(curvePool).remove_liquidity_one_coin(IERC20(curveLPToken).balanceOf(address(this)), assetCurveIndex, 0);
-        //IERC20(underlyingToken).safeTransfer(owner(), IERC20(underlyingToken).balanceOf(address(this)));
+        ICRVPlainPool(curvePool).remove_liquidity_one_coin(IERC20(curveLPToken).balanceOf(address(this)), assetCurveIndex, 0);
+        // TODO: after testing should set returnedAmount = to above call
+        returnedAmount = IERC20(underlyingToken).balanceOf(address(this));
+        IERC20(underlyingToken).safeTransfer(owner(), IERC20(underlyingToken).balanceOf(address(this)));
     }
 
 

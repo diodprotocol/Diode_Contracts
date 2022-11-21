@@ -265,6 +265,7 @@ contract Diode_test_Polygon is Test {
 
         vm.startPrank(random);
         IERC20(WMATIC).safeTransfer(address(curveBeefy), 500 ether);
+        emit log_named_uint("Beefy Strat Balance After 4 deposits:", curveBeefy.stratBalance());
         vm.stopPrank();
 
         vm.prank(diode.owner());
@@ -277,6 +278,7 @@ contract Diode_test_Polygon is Test {
         // FTX
         emit log_string("FTX initial data");
         emit log_named_uint("total Rewards:", diode.totalRewards());
+        emit log_named_uint("total Returned from strat:", diode.totalReturnedFromStrat());
         emit log_named_uint("total assets:", diode.totalDeposits());
         emit log_named_uint("endPrice:", diode.endPrice());
 
@@ -308,6 +310,114 @@ contract Diode_test_Polygon is Test {
         emit log_named_uint("total longs:", diode.alphaLongs());
         emit log_named_uint("total shorts:", diode.alphaShorts());
     }
+
+    function test_DiodePoly_DepositAndWithdrawFunds_NoGain() public {
+
+        // +1 hour
+        vm.warp(block.timestamp + 1 hours);
+
+        // Random deposit
+        vm.startPrank(random);
+
+        IERC20(WMATIC).safeApprove(address(diode), 1000 ether);
+
+        // Send 500 WMATIC to user1,2,3
+        IERC20(WMATIC).safeTransfer(user1, 500 ether);
+        IERC20(WMATIC).safeTransfer(user2, 500 ether);
+        IERC20(WMATIC).safeTransfer(user3, 500 ether);
+
+        diode.depositFunds(1000 ether, true);
+
+        vm.stopPrank();
+
+        //////////////////////////////////////////////////////// + 15 days
+        vm.warp(block.timestamp + 15 days);
+        //////////////////////////////////////////////////////// 
+
+        // user1 deposit
+        vm.startPrank(user1);
+
+        IERC20(WMATIC).safeApprove(address(diode), 500 ether);
+
+        diode.depositFunds(500 ether, false);
+
+        vm.stopPrank();
+
+        //////////////////////////////////////////////////////// + 7 days
+        vm.warp(block.timestamp + 7 days);
+        //////////////////////////////////////////////////////// 
+
+        // user2 deposit
+        vm.startPrank(user2);
+
+        IERC20(WMATIC).safeApprove(address(diode), 500 ether);
+
+        diode.depositFunds(500 ether, true);
+
+        vm.stopPrank();  
+
+        //////////////////////////////////////////////////////// + 2 days
+        vm.warp(block.timestamp + 2 days);
+        //////////////////////////////////////////////////////// 
+
+        // user3 deposit
+        vm.startPrank(user3);
+
+        IERC20(WMATIC).safeApprove(address(diode), 500 ether);
+        
+        diode.depositFunds(500 ether, false);
+
+        vm.stopPrank(); 
+
+        //////////////////////////////////////////////////////// + 8 days
+        vm.warp(block.timestamp + 8 days);
+        //////////////////////////////////////////////////////// 
+   
+        emit log_named_uint("Beefy Strat Balance After 4 deposits:", curveBeefy.stratBalance());
+
+        vm.prank(diode.owner());
+        diode.closePool();
+
+        //////////////////////////////////////////////////////// 
+        //   GET REWARDS
+        //////////////////////////////////////////////////////// 
+
+        // FTX
+        emit log_string("FTX initial data");
+        emit log_named_uint("total Rewards:", diode.totalRewards());
+        emit log_named_uint("total Returned from strat:", diode.totalReturnedFromStrat());
+        emit log_named_uint("total assets:", diode.totalDeposits());
+        emit log_named_uint("endPrice:", diode.endPrice());
+
+        vm.startPrank(random);
+        uint256 random_amount = diode.getReward(1);
+        vm.stopPrank();
+
+        // user 1
+        vm.startPrank(user1);
+        uint256 user1_amount = diode.getReward(2);
+        vm.stopPrank();
+
+        // user 2
+        vm.startPrank(user2);
+        uint256 user2_amount = diode.getReward(3);
+        vm.stopPrank();  
+
+        // user 3
+        vm.startPrank(user3);
+        uint256 user3_amount = diode.getReward(4);
+        vm.stopPrank();
+
+        emit log_named_uint("random amount:", random_amount);
+        emit log_named_uint("user1 amount:", user1_amount);
+        emit log_named_uint("user 2 amount:", user2_amount);
+        emit log_named_uint("user 3 amount:", user3_amount);
+        emit log_named_uint("remaining contract balance:", IERC20(diode.suppliedAsset()).balanceOf(address(diode)));
+
+        emit log_named_uint("total longs:", diode.alphaLongs());
+        emit log_named_uint("total shorts:", diode.alphaShorts());
+    }
+
 
 
 }

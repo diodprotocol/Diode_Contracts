@@ -241,6 +241,7 @@ contract Diode is ERC721, Ownable {
         if (totalReturnedFromStrat > 0) {
             amountOwed = (tokenToPosition[tokenID].amount * totalReturnedFromStrat) / totalDeposits;
             IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
+            return amountOwed;
         } else {
             if (endPrice >= strikePrice && tokenToPosition[tokenID].longOrShort == true) {
                 alpha = tokenToPosition[tokenID].alpha;
@@ -261,6 +262,7 @@ contract Diode is ERC721, Ownable {
 
             return amountOwed;
         }
+
     }
 
     function standardizeBase9Chainlink(uint256 amount) private view returns (uint256 standardizedAmount) {
