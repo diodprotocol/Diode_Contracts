@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
-import "./Diode.sol";
+import "../Diode.sol";
 
 
     // ============================ Contract ==========================
@@ -25,6 +25,7 @@ contract DiodeFactory {
         uint256 _deltaPrice,
         address _chainlinkPriceFeed,
         uint256 _fees,
+        uint256[2] _capLongShort,
         string  _name,
         string  _symbol
     );
@@ -52,6 +53,7 @@ contract DiodeFactory {
         uint256 _deltaPrice,
         address _chainlinkPriceFeed,
         uint256 _fees,
+        uint256[2] memory _capLongShort,
         string memory _name,
         string memory _symbol
     ) 
@@ -67,12 +69,13 @@ contract DiodeFactory {
             _deltaPrice,
             _chainlinkPriceFeed,
             _fees,
+            _capLongShort,
             _name,
             _symbol
             ));
 
         diodePoolsList.push(deployedPool);
-        emit NewDiodePool(_strikePrice, _asset, _duration, _startTime, _deltaPrice, _chainlinkPriceFeed, _fees, _name, _symbol);
+        emit NewDiodePool(_strikePrice, _asset, _duration, _startTime, _deltaPrice, _chainlinkPriceFeed, _fees, _capLongShort, _name, _symbol);
     }
 
 

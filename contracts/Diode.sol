@@ -27,7 +27,7 @@ interface AggregatorV3Interface {
     function decimals() external view returns (uint8);
 }
 
-interface IEulerStrat {
+interface IStrategy {
     function deposit(address token, uint256 amount) external;
     function withdraw() external returns (uint256);
     function getSupplyAPY() external view returns (uint256);
@@ -60,6 +60,7 @@ contract Diode is ERC721, Ownable {
     uint256 public totalReturnedFromStrat;
     /// @dev in BIPS
     uint256 public withdrawFees;
+    uint256[2] public capLongShort;
 
     /// @dev Base 18 variables
     uint256 public alphaLongs;
@@ -96,9 +97,14 @@ contract Diode is ERC721, Ownable {
     /// @notice Initializes the Iode pool.
     /// @param _strikePrice strike price for the supplied asset at the end of duration of the pool, (base 9).
     /// @param _asset address of the asset supplied to the pool.
-    /// @param _duration address of the convex Booster contract.
+    /// @param _duration duration for this contract in seconds.
     /// @param _deltaPrice the risk factor used by the contract to scale the pricing risk (base 9)
     /// @param _chainlinkPriceFeed  contract address of the chainlink price feed for supplied asset.
+    /// @param _fees fees in BIPS to collect on withdrawal (only collected on "winning" withdrawals).
+    /// @param _capLongShort max amount of tokens investable in either long or short position.
+    /// @param _name name of the ERC721 token.
+    /// @param _symbol symbol of the ERC721 token.
+
 
     constructor(
         uint256 _strikePrice, 
@@ -108,12 +114,13 @@ contract Diode is ERC721, Ownable {
         uint256 _deltaPrice,
         address _chainlinkPriceFeed,
         uint256 _fees,
+        uint256[2] memory _capLongShort,
         string memory _name,
         string memory _symbol
     ) 
         ERC721(_name, _symbol)
     {
-        require(_fees <= 4000, "Max fee is 40%");
+        require(_fees <= 3000, "Max fee is 30%");
         suppliedAsset = _asset;
         strikePrice = _strikePrice;
         chainlinkPriceFeed = _chainlinkPriceFeed;
@@ -122,6 +129,7 @@ contract Diode is ERC721, Ownable {
         finalTime = _startTime + _duration;
         deltaPrice = _deltaPrice;
         withdrawFees = _fees;
+        capLongShort = _capLongShort;
         transferOwnership(tx.origin);
     }
 
@@ -145,6 +153,11 @@ contract Diode is ERC721, Ownable {
     ) 
     {
         require(block.timestamp >= startTime);
+        if (longShort == true) {
+            require(totalDepositsLONG + amount <= capLongShort[0], "Max amount for long positions exceeded");
+        } else {
+            require(totalDepositsSHORT + amount <= capLongShort[1], "Max amount for short positions exceeded");
+        }
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         totalDeposits += amount;
@@ -175,7 +188,7 @@ contract Diode is ERC721, Ownable {
         //TODO: ask why issue when replacing with "amount" below (stack too deep error)
         IERC20(suppliedAsset).safeTransferFrom(_msgSender(), address(this), standardizedAmount * 10**9);
         IERC20(suppliedAsset).safeApprove(stratContract, standardizedAmount * 10**9);
-        IEulerStrat(stratContract).deposit(suppliedAsset, standardizedAmount * 10**9);
+        IStrategy(stratContract).deposit(suppliedAsset, standardizedAmount * 10**9);
         _safeMint(_msgSender(), newTokenID);
 
         return (computedPriceRisk, alpha, standardizedPrice, standardizedAmount);
@@ -208,7 +221,7 @@ contract Diode is ERC721, Ownable {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
         endPrice = standardizeBase9Chainlink(uint256(price));
-        uint256 returnedAmount = IEulerStrat(stratContract).withdraw();
+        uint256 returnedAmount = IStrategy(stratContract).withdraw();
         if (returnedAmount <= totalDeposits) {
             totalReturnedFromStrat = returnedAmount;
         } else if (returnedAmount > totalDeposits) {

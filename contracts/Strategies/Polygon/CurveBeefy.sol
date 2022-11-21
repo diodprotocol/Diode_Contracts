@@ -15,7 +15,7 @@ interface ICRVPlainPool {
     function coins(uint256 i) external view returns (address);
     function balances(uint256 i) external view returns (uint256);
     function remove_liquidity(uint256 amount, uint256[2] memory min_amounts_out) external returns (uint256[2] memory);
-    function remove_liquidity_one_coin(uint256 token_amount, int128 index, uint min_amount) external;
+    function remove_liquidity_one_coin(uint256 token_amount, uint256 index, uint256 min_amount) external returns (uint256);
 }
 
 interface IBeefyVault {
@@ -38,8 +38,8 @@ contract CurveBeefy is Ownable {
     address public underlyingToken;
     address public curvePool;
     address public beefyVault;
-    address public curveLP;
-    int128 public assetCurveIndex;
+    address public curveLPToken;
+    uint256 public assetCurveIndex;
 
 
     // -----------------
@@ -52,7 +52,7 @@ contract CurveBeefy is Ownable {
         address _underlyingToken, 
         address _diodePool,
         address _curvePool,
-        address _curveLP,
+        address _curveLPToken,
         address _beefyVault
     ) 
     {
@@ -61,7 +61,7 @@ contract CurveBeefy is Ownable {
         underlyingToken = _underlyingToken;
         curvePool = _curvePool;
         beefyVault = _beefyVault;
-        curveLP = _curveLP;
+        curveLPToken = _curveLPToken;
 
         if (ICRVPlainPool(_curvePool).coins(0) == _underlyingToken) {
             assetCurveIndex = 0;
@@ -90,16 +90,16 @@ contract CurveBeefy is Ownable {
         }
 
         ICRVPlainPool(curvePool).add_liquidity(depositsCurve, 0);
-        IERC20(curveLP).safeApprove(beefyVault, IERC20(curveLP).balanceOf(address(this)));
-        IBeefyVault(beefyVault).deposit(IERC20(curveLP).balanceOf(address(this)));
+        IERC20(curveLPToken).safeApprove(beefyVault, IERC20(curveLPToken).balanceOf(address(this)));
+        IBeefyVault(beefyVault).deposit(IERC20(curveLPToken).balanceOf(address(this)));
     }
 
     function withdraw() external onlyOwner returns (uint256 returnedAmount) {
         IBeefyVault(beefyVault).withdrawAll();
-        ICRVPlainPool(curvePool).remove_liquidity_one_coin(IERC20(curveLP).balanceOf(address(this)), assetCurveIndex, 0);
-        returnedAmount = IERC20(underlyingToken).balanceOf(address(this));
-        IERC20(underlyingToken).safeTransfer(owner(), IERC20(underlyingToken).balanceOf(address(this)));
+        returnedAmount = ICRVPlainPool(curvePool).remove_liquidity_one_coin(IERC20(curveLPToken).balanceOf(address(this)), assetCurveIndex, 0);
+        //IERC20(underlyingToken).safeTransfer(owner(), IERC20(underlyingToken).balanceOf(address(this)));
     }
+
 
     function stratBalance() public view returns (uint256 totalInvested) {
         totalInvested = IBeefyVault(beefyVault).balanceOf(address(this));

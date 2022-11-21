@@ -32,6 +32,7 @@ contract DiodeFactoryAll {
         uint256 _deltaPrice,
         address _chainlinkPriceFeed,
         uint256 _fees,
+        uint256[2] _capLongShort,
         string  _name,
         string  _symbol
     );
@@ -67,6 +68,7 @@ contract DiodeFactoryAll {
         uint256 _deltaPrice,
         address _chainlinkPriceFeed,
         uint256 _fees,
+        uint256[2] memory _capLongShort,
         string memory _name,
         string memory _symbol
     ) external returns (address deployedPool, address deployedEulerStrat) {
@@ -79,12 +81,13 @@ contract DiodeFactoryAll {
             _deltaPrice,
             _chainlinkPriceFeed,
             _fees,
+            _capLongShort,
             _name,
             _symbol
             ));
 
         diodePoolsList.push(deployedPool);
-        emit NewDiodePool(_strikePrice, _asset, _duration, _startTime, _deltaPrice, _chainlinkPriceFeed, _fees, _name, _symbol);
+        emit NewDiodePool(_strikePrice, _asset, _duration, _startTime, _deltaPrice, _chainlinkPriceFeed, _fees, _capLongShort, _name, _symbol);
 
         deployedEulerStrat = address(new EulerStrat(
             _asset,

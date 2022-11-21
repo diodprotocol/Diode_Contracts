@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Diode.sol": {
-      "lastModificationDate": 1668193211981,
-      "contentHash": "291abe2bfe4d68150f0635be2cc4b331",
+      "lastModificationDate": 1669040024642,
+      "contentHash": "3749a00c31de8a28b2d6bee10319219a",
       "sourceName": "contracts/Diode.sol",
       "solcConfig": {
         "settings": {
@@ -68,15 +68,15 @@
         "Diode": {
           "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/Diode.json"
         },
-        "IEulerStrat": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/IEulerStrat.json"
+        "IStrategy": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/IStrategy.json"
         }
       }
     },
-    "contracts/DiodeFactory.sol": {
-      "lastModificationDate": 1667738752595,
-      "contentHash": "3520e0f7719d6464cd6d956b8b3bf5da",
-      "sourceName": "contracts/DiodeFactory.sol",
+    "contracts/Factories/DiodeFactory.sol": {
+      "lastModificationDate": 1668876459526,
+      "contentHash": "184ae3406a7bc3b84b21cb0be4eed1ed",
+      "sourceName": "contracts/Factories/DiodeFactory.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -130,10 +130,10 @@
         }
       }
     },
-    "contracts/DiodeFactoryAll.sol": {
-      "lastModificationDate": 1667126650627,
-      "contentHash": "9deb0313459b103ef1ad87fa2d5cb4c0",
-      "sourceName": "contracts/DiodeFactoryAll.sol",
+    "contracts/Factories/DiodeFactoryAll.sol": {
+      "lastModificationDate": 1668876529476,
+      "contentHash": "35166043120c1479aaaa1db1f5be897f",
+      "sourceName": "contracts/Factories/DiodeFactoryAll.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -162,7 +162,7 @@
       },
       "imports": [
         "contracts/Diode.sol",
-        "contracts/EulerStrat.sol",
+        "contracts/Strategies/Mainnet/EulerStrat.sol",
         "node_modules/@openzeppelin/contracts/access/Ownable.sol",
         "node_modules/@openzeppelin/contracts/interfaces/IERC20Metadata.sol",
         "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol",
@@ -191,10 +191,59 @@
         }
       }
     },
-    "contracts/EulerStrat.sol": {
-      "lastModificationDate": 1668192884824,
-      "contentHash": "72c697bcbe5097fb2525c770b943debb",
-      "sourceName": "contracts/EulerStrat.sol",
+    "contracts/Factories/EulerStratFactory.sol": {
+      "lastModificationDate": 1668866300050,
+      "contentHash": "2e68ba408f524e920a9dfa6c697e2d13",
+      "sourceName": "contracts/Factories/EulerStratFactory.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Strategies/Mainnet/EulerStrat.sol",
+        "node_modules/@openzeppelin/contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin/contracts/interfaces/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/hardhat/console.sol"
+      ],
+      "versionRequirement": "^0.8.16",
+      "artifacts": {
+        "EulerStratFactory": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "EulerStratFactory.sol/EulerStratFactory.json"
+        }
+      }
+    },
+    "contracts/Strategies/Mainnet/EulerStrat.sol": {
+      "lastModificationDate": 1668870301318,
+      "contentHash": "570a3118d3984e30aea6f26c8991695b",
+      "sourceName": "contracts/Strategies/Mainnet/EulerStrat.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -247,10 +296,10 @@
         }
       }
     },
-    "contracts/EulerStratFactory.sol": {
-      "lastModificationDate": 1667067007778,
-      "contentHash": "9da85c5530c3739b6ed3d6743babcfb5",
-      "sourceName": "contracts/EulerStratFactory.sol",
+    "contracts/Strategies/Polygon/CurveBeefy.sol": {
+      "lastModificationDate": 1669047016278,
+      "contentHash": "59c2bc7a710fed58dcd391a06f270078",
+      "sourceName": "contracts/Strategies/Polygon/CurveBeefy.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -278,9 +327,7 @@
         }
       },
       "imports": [
-        "contracts/EulerStrat.sol",
         "node_modules/@openzeppelin/contracts/access/Ownable.sol",
-        "node_modules/@openzeppelin/contracts/interfaces/IERC20Metadata.sol",
         "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
         "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
@@ -291,8 +338,14 @@
       ],
       "versionRequirement": "^0.8.16",
       "artifacts": {
-        "EulerStratFactory": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "EulerStratFactory.sol/EulerStratFactory.json"
+        "CurveBeefy": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "CurveBeefy.sol/CurveBeefy.json"
+        },
+        "IBeefyVault": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "CurveBeefy.sol/IBeefyVault.json"
+        },
+        "ICRVPlainPool": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "CurveBeefy.sol/ICRVPlainPool.json"
         }
       }
     },
@@ -1216,10 +1269,10 @@
         }
       }
     },
-    "test/foundry/Diode.t.sol": {
-      "lastModificationDate": 1668192348184,
-      "contentHash": "cb160e603f9f72787dbb3053a3161092",
-      "sourceName": "test/foundry/Diode.t.sol",
+    "test/foundry/Mainnet/DiodeMain.t.sol": {
+      "lastModificationDate": 1668877273009,
+      "contentHash": "29a1ce2984a2f7e3042b3b7648733cd2",
+      "sourceName": "test/foundry/Mainnet/DiodeMain.t.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1248,7 +1301,7 @@
       },
       "imports": [
         "contracts/Diode.sol",
-        "contracts/EulerStrat.sol",
+        "contracts/Strategies/Mainnet/EulerStrat.sol",
         "lib/forge-std/lib/ds-test/src/test.sol",
         "lib/forge-std/src/Script.sol",
         "lib/forge-std/src/Test.sol",
@@ -1274,17 +1327,89 @@
       ],
       "versionRequirement": "^0.8.16",
       "artifacts": {
-        "Diode_test": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.t.sol/Diode_test.json"
+        "Diode_test_Mainnet": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodeMain.t.sol/Diode_test_Mainnet.json"
         },
         "IEulerEToken": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.t.sol/IEulerEToken.json"
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodeMain.t.sol/IEulerEToken.json"
         },
         "IEulerMarkets": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.t.sol/IEulerMarkets.json"
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodeMain.t.sol/IEulerMarkets.json"
         },
         "IEulerStrat": {
-          "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.t.sol/IEulerStrat.json"
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodeMain.t.sol/IEulerStrat.json"
+        }
+      }
+    },
+    "test/foundry/Polygon/DiodePolygon.t.sol": {
+      "lastModificationDate": 1669047080791,
+      "contentHash": "2679bd706a2e3af8e82916f739f45a4c",
+      "sourceName": "test/foundry/Polygon/DiodePolygon.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Diode.sol",
+        "contracts/Strategies/Polygon/CurveBeefy.sol",
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "node_modules/@openzeppelin/contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/@openzeppelin/contracts/utils/Strings.sol",
+        "node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol",
+        "node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
+        "node_modules/hardhat/console.sol"
+      ],
+      "versionRequirement": "^0.8.16",
+      "artifacts": {
+        "Diode_test_Polygon": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodePolygon.t.sol/Diode_test_Polygon.json"
+        },
+        "IEulerEToken": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodePolygon.t.sol/IEulerEToken.json"
+        },
+        "IEulerMarkets": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodePolygon.t.sol/IEulerMarkets.json"
+        },
+        "IEulerStrat": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodePolygon.t.sol/IEulerStrat.json"
         }
       }
     }

@@ -2,15 +2,15 @@
 pragma solidity ^0.8.16;
 
 //standard test libs
-import "../../lib/forge-std/src/Test.sol";
-import "../../lib/forge-std/src/Vm.sol";
+import "../../../lib/forge-std/src/Test.sol";
+import "../../../lib/forge-std/src/Vm.sol";
 
 //librairies
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 //Contract under test
-import {Diode} from "../../contracts/Diode.sol";
-import {EulerStrat} from "../../contracts/EulerStrat.sol";
+import {Diode} from "../../../contracts/Diode.sol";
+import {EulerStrat} from "../../../contracts/Strategies/Mainnet/EulerStrat.sol";
 
 interface IEulerMarkets {
     function underlyingToEToken(address) external returns (address);
@@ -27,7 +27,7 @@ interface IEulerEToken {
     function balanceOf(address) external returns (uint);
 }
 
-contract Diode_test is Test {
+contract Diode_test_Mainnet is Test {
 
     using SafeERC20 for IERC20;
 
@@ -36,7 +36,7 @@ contract Diode_test is Test {
     EulerStrat private eulerStrat;
 
     // init users
-    address FTX = 0x2FAF487A4414Fe77e2327F0bf4AE2a264a776AD2; // 
+    address random = 0x0bA97739E3a5F6e6086E4Fd92E37f5934d7F8dFc; // 4 stETH 
     address user1 = 0x1c1cc870115FDf86288cf38556c4da441699A0E2; // 30 stETH
     address user2 = 0x5ee50C69028CC6121982d6bf1aBf95ED10D57D15; // 1 stETH
     address user3 = 0x11fdBcf4FCD2AAc2397B7F7858877e2351C9b1E3; // 32 stETH
@@ -69,7 +69,10 @@ contract Diode_test is Test {
 
     function setUp() public {
 
-        uint256 strikePrice = 1600 * 10**9;
+        uint256[2] memory cap;
+        cap[0] = 30 * 10**18;
+        cap[1] = 30 * 10**18;
+        uint256 strikePrice = 1200 * 10**9;
         uint256 duration = 2629743; // 30.44 days UNIX time
         uint256 deltaPrice = 300 * 10**9;
         address chainlinkPriceFeed = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419; // ETH/USD price feed
@@ -82,7 +85,8 @@ contract Diode_test is Test {
             block.timestamp,
             deltaPrice,
             chainlinkPriceFeed,
-            10**17,
+            1000,
+            cap,
             "Diode_stETH",
             "DIO1"
         );
@@ -127,7 +131,7 @@ contract Diode_test is Test {
         vm.warp(block.timestamp + 1 hours);
 
         // FTX deposit
-        vm.startPrank(FTX);
+        vm.startPrank(random);
 
         IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 10 ether);
 
@@ -219,8 +223,8 @@ contract Diode_test is Test {
 
         emit log_named_uint("Euler Strat Balance before:", eulerStrat.stratBalance());
 
-        emit log_named_uint("expected APY longs:", diode.currentAPY_longs());
-        emit log_named_uint("expected APY shorts:", diode.currentAPY_shorts());
+        emit log_named_uint("expected APY longs:", diode.apyBoosterLong());
+        emit log_named_uint("expected APY shorts:", diode.apyBoosterShort());
 
         vm.startPrank(address(diode));
         emit log_named_uint("get supply APY Euler:", eulerStrat.getSupplyAPY());
@@ -238,14 +242,14 @@ contract Diode_test is Test {
         vm.warp(block.timestamp + 1 hours);
 
         // FTX deposit
-        vm.startPrank(FTX);
+        vm.startPrank(random);
 
-        IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 10 ether);
+        IERC20(LidoStETH).safeApprove(0xCe71065D4017F316EC606Fe4422e11eB2c47c246, 4 ether);
 
         (uint256 FTX_computedPriceRisk,
          uint256 FTX_alpha,
          uint256 FTX_standardizedPrice, 
-         uint256 FTX_standardizedAmount) = diode.depositFunds(10 ether, true);
+         uint256 FTX_standardizedAmount) = diode.depositFunds(4 ether, true);
 
         vm.stopPrank();
 
@@ -304,6 +308,11 @@ contract Diode_test is Test {
         vm.warp(block.timestamp + 8 days);
         //////////////////////////////////////////////////////// 
 
+        vm.startPrank(user1);
+        IERC20(diode.suppliedAsset()).safeTransfer(address(eulerStrat), 1 ether);
+        vm.stopPrank();
+
+        vm.prank(diode.owner());
         diode.closePool();
 
         //////////////////////////////////////////////////////// 
@@ -315,9 +324,8 @@ contract Diode_test is Test {
         emit log_named_uint("total Rewards:", diode.totalRewards());
         emit log_named_uint("total assets:", diode.totalDeposits());
 
-        vm.startPrank(FTX);
+        vm.startPrank(random);
         uint256 FTX_amount = diode.getReward(1);
-        IERC20(diode.suppliedAsset()).safeTransfer(address(diode), 15 * 10**18);
         vm.stopPrank();
 
         // user 1
@@ -335,7 +343,7 @@ contract Diode_test is Test {
         uint256 user3_amount = diode.getReward(4);
         vm.stopPrank();
 
-        emit log_named_uint("FTX amount:", FTX_amount);
+        emit log_named_uint("random amount:", FTX_amount);
         emit log_named_uint("user1 amount:", user1_amount);
         emit log_named_uint("user 2 amount:", user2_amount);
         emit log_named_uint("user 3 amount:", user3_amount);
