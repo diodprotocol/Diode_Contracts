@@ -162,6 +162,7 @@ contract Diode is ERC721, Ownable {
         require(price > 0);
         totalDeposits += amount;
         uint256 convertedPrice = uint256(price);
+        uint256 memoryAmount = amount;
         uint256 standardizedPrice = standardizeBase9Chainlink(convertedPrice);
         uint256 computedPriceRisk = computePriceRisk(standardizedPrice, longShort);
         uint256 standardizedAmount = standardizeBase9(amount, suppliedAsset);
@@ -186,9 +187,9 @@ contract Diode is ERC721, Ownable {
         }
 
         //TODO: ask why issue when replacing with "amount" below (stack too deep error)
-        IERC20(suppliedAsset).safeTransferFrom(_msgSender(), address(this), standardizedAmount * 10**9);
-        IERC20(suppliedAsset).safeApprove(stratContract, standardizedAmount * 10**9);
-        IStrategy(stratContract).deposit(suppliedAsset, standardizedAmount * 10**9);
+        IERC20(suppliedAsset).safeTransferFrom(_msgSender(), address(this), memoryAmount);
+        IERC20(suppliedAsset).safeApprove(stratContract, memoryAmount);
+        IStrategy(stratContract).deposit(suppliedAsset, memoryAmount);
         _safeMint(_msgSender(), newTokenID);
 
         return (computedPriceRisk, alpha, standardizedPrice, standardizedAmount);

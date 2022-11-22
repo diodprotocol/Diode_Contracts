@@ -21,10 +21,16 @@ module.exports = {
       url: process.env.ALCHEMY_GOERLI,
       accounts: [process.env.PRIVATE_KEY],
       gas: "auto",
+    },
+
+    polygon: {
+      url: process.env.ALCHEMY_POLYGON,
+      accounts: [process.env.PRIVATE_KEY],
+      gas: "auto"
     }
   },
 
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API
+    apiKey: process.env.ETHERSCAN_POLYGON_API
   },
 };
