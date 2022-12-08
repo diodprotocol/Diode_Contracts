@@ -38,6 +38,7 @@ interface IStrategy {
     // -----------------
 
 
+//TODO: fct to collect fees.
 contract Diode is ERC721, Ownable {
 
     using SafeERC20 for IERC20;
@@ -58,6 +59,7 @@ contract Diode is ERC721, Ownable {
     uint256 public totalDepositsLONG;
     uint256 public totalDepositsSHORT;
     uint256 public totalReturnedFromStrat;
+    uint256 public feesCollected;
     /// @dev in BIPS
     uint256 public withdrawFees;
     uint256[2] public capLongShort;
@@ -249,13 +251,15 @@ contract Diode is ERC721, Ownable {
                 amountOwed =  totalRewards.mulDiv(alpha, alphaLongs, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
+                feesCollected += fees;
             }
-
+        
             if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
                 alpha = tokenToPosition[tokenID].alpha;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaShorts, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
+                feesCollected += fees;
              }
 
             amountOwed += tokenToPosition[tokenID].amount;
@@ -263,7 +267,13 @@ contract Diode is ERC721, Ownable {
 
             return amountOwed;
         }
+    }
 
+    function collectFees() external onlyOwner {
+        require(feesCollected > 0, "not enough fees to withdraw");
+        uint256 amountToSend = feesCollected;
+        feesCollected = 0;
+        IERC20(suppliedAsset).safeTransfer(_msgSender(), amountToSend);
     }
 
     function standardizeBase9Chainlink(uint256 amount) private view returns (uint256 standardizedAmount) {
