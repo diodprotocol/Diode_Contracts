@@ -38,7 +38,6 @@ interface IStrategy {
     // -----------------
 
 
-//TODO: fct to collect fees.
 contract Diode is ERC721, Ownable {
 
     using SafeERC20 for IERC20;

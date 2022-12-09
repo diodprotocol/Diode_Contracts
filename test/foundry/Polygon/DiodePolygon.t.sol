@@ -74,7 +74,7 @@ contract Diode_test_Polygon is Test {
         uint256[2] memory cap;
         cap[0] = 10_000 * 10**18;
         cap[1] = 10_000 * 10**18;
-        uint256 strikePrice = 10**9;
+        uint256 strikePrice = 9**9;
         uint256 duration = 2629743; // 30.44 days UNIX time
         uint256 deltaPrice = 2 * 10**8;
         address chainlinkPriceFeed = 0xAB594600376Ec9fD91F8e885dADF0CE036862dE0; // MATIC/USD price feed
