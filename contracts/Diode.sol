@@ -122,6 +122,7 @@ contract Diode is ERC721, Ownable {
         ERC721(_name, _symbol)
     {
         require(_fees <= 3000, "Max fee is 30%");
+        require(_startTime >= block.timestamp, "startTime can't be in the past");
         suppliedAsset = _asset;
         strikePrice = _strikePrice;
         chainlinkPriceFeed = _chainlinkPriceFeed;
