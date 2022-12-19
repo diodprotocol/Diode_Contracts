@@ -243,6 +243,7 @@ contract Diode is ERC721, Ownable {
 
         if (totalReturnedFromStrat > 0) {
             amountOwed = (tokenToPosition[tokenID].amount * totalReturnedFromStrat) / totalDeposits;
+            _burn(tokenID);
             IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
             return amountOwed;
         } else {
@@ -252,9 +253,7 @@ contract Diode is ERC721, Ownable {
                 fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
                 amountOwed -= fees;
                 feesCollected += fees;
-            }
-        
-            if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
+            } else if (endPrice < strikePrice && tokenToPosition[tokenID].longOrShort == false) {
                 alpha = tokenToPosition[tokenID].alpha;
                 amountOwed =  totalRewards.mulDiv(alpha, alphaShorts, Math.Rounding.Down);
                 fees = amountOwed.mulDiv(withdrawFees, 10**4, Math.Rounding.Up);
@@ -263,6 +262,7 @@ contract Diode is ERC721, Ownable {
              }
 
             amountOwed += tokenToPosition[tokenID].amount;
+            _burn(tokenID);
             IERC20(suppliedAsset).safeTransfer(_msgSender(), amountOwed);
 
             return amountOwed;
