@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Diode.sol": {
-      "lastModificationDate": 1669049090978,
-      "contentHash": "9c2cefc1a5ee76fa42b4eb43513688e8",
+      "lastModificationDate": 1671640182237,
+      "contentHash": "5c4ad22d2dd2c11bc9cf3bfeed28b255",
       "sourceName": "contracts/Diode.sol",
       "solcConfig": {
         "settings": {
@@ -70,6 +70,67 @@
         },
         "IStrategy": {
           "0.8.16+commit.07a7930e.Darwin.appleclang": "Diode.sol/IStrategy.json"
+        }
+      }
+    },
+    "contracts/Factories/DiodeFactPolygon.sol": {
+      "lastModificationDate": 1669111562717,
+      "contentHash": "809567c82bd4ccbab90811384a61cf58",
+      "sourceName": "contracts/Factories/DiodeFactPolygon.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Diode.sol",
+        "contracts/Strategies/Polygon/CurveBeefy.sol",
+        "node_modules/@openzeppelin/contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin/contracts/interfaces/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/@openzeppelin/contracts/utils/Strings.sol",
+        "node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol",
+        "node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
+        "node_modules/hardhat/console.sol"
+      ],
+      "versionRequirement": "^0.8.16",
+      "artifacts": {
+        "DiodeFactPolygon": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodeFactPolygon.sol/DiodeFactPolygon.json"
+        },
+        "IDiodePool": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "DiodeFactPolygon.sol/IDiodePool.json"
         }
       }
     },
@@ -1270,8 +1331,8 @@
       }
     },
     "test/foundry/Mainnet/DiodeMain.t.sol": {
-      "lastModificationDate": 1668877273009,
-      "contentHash": "29a1ce2984a2f7e3042b3b7648733cd2",
+      "lastModificationDate": 1671639670474,
+      "contentHash": "16719e0f137830df54f8583d6a9c3623",
       "sourceName": "test/foundry/Mainnet/DiodeMain.t.sol",
       "solcConfig": {
         "settings": {
@@ -1342,8 +1403,8 @@
       }
     },
     "test/foundry/Polygon/DiodePolygon.t.sol": {
-      "lastModificationDate": 1669048325773,
-      "contentHash": "9d55fe523acb4ae3b12caec4292e21d8",
+      "lastModificationDate": 1670519887267,
+      "contentHash": "8d5cca68b5d94bc90cc1adb4cdd78667",
       "sourceName": "test/foundry/Polygon/DiodePolygon.t.sol",
       "solcConfig": {
         "settings": {

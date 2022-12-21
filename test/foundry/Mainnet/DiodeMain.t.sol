@@ -36,10 +36,10 @@ contract Diode_test_Mainnet is Test {
     EulerStrat private eulerStrat;
 
     // init users
-    address random = 0x0bA97739E3a5F6e6086E4Fd92E37f5934d7F8dFc; // 4 stETH 
-    address user1 = 0x1c1cc870115FDf86288cf38556c4da441699A0E2; // 30 stETH
+    address random = 0x69217947EfBB9684C32BF2211185e6684412BEd6; // 19 stETH 
+    address user1 = 0x1c1cc870115FDf86288cf38556c4da441699A0E2; // 50 stETH
     address user2 = 0x5ee50C69028CC6121982d6bf1aBf95ED10D57D15; // 1 stETH
-    address user3 = 0x11fdBcf4FCD2AAc2397B7F7858877e2351C9b1E3; // 32 stETH
+    address user3 = 0x11fdBcf4FCD2AAc2397B7F7858877e2351C9b1E3; // 42 stETH
 
     // init tokens
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -76,6 +76,10 @@ contract Diode_test_Mainnet is Test {
         uint256 duration = 2629743; // 30.44 days UNIX time
         uint256 deltaPrice = 300 * 10**9;
         address chainlinkPriceFeed = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419; // ETH/USD price feed
+/*         deal(LidoStETH, random, 20 ether);
+        deal(LidoStETH, user1, 20 ether);
+        deal(LidoStETH, user2, 20 ether);
+        deal(LidoStETH, user3, 20 ether); */
 
         //Instantiate new contract instance
         diode = new Diode(

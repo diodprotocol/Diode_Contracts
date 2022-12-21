@@ -142,13 +142,21 @@ contract Diode is ERC721, Ownable {
     //    Functions
     // -----------------
 
-
+    /// @notice Will set the address of the strategy of the pool.
+    /// @param _strat address of the underlying strategy.
     function setStrategy(address _strat) external {
         require(strategyActivated == false);
         strategyActivated = true;
         stratContract = _strat;
     }
 
+    /// @notice Deposits funds in the contract and mints an ERC721 with details of contracted option.
+    /// @param  amount               Amount of underlying token to deposit.
+    /// @param  longShort            Long or short position on "strikePrice".
+    /// @return _computedRisk        Price risk taken on the position.
+    /// @return _alpha               Deposit amount weighted according to the contracted option (price and time-risk).
+    /// @return _standardizedPrice   Price returned from Chainlink in 9 decimals.
+    /// @return _standardizedAmount  Amount of underlying asset deposited with 9 decimals.
     function depositFunds(uint256 amount, bool longShort) public returns (
         uint256 _computedRisk, 
         uint256 _alpha, 
@@ -190,7 +198,6 @@ contract Diode is ERC721, Ownable {
             totalDepositsSHORT += amount;
         }
 
-        //TODO: ask why issue when replacing with "amount" below (stack too deep error)
         IERC20(suppliedAsset).safeTransferFrom(_msgSender(), address(this), memoryAmount);
         IERC20(suppliedAsset).safeApprove(stratContract, memoryAmount);
         IStrategy(stratContract).deposit(suppliedAsset, memoryAmount);
@@ -199,7 +206,10 @@ contract Diode is ERC721, Ownable {
         return (computedPriceRisk, alpha, standardizedPrice, standardizedAmount);
     }
 
-
+    /// @notice Calculates the price risk based on deviation from actual price vs "strikePrice" and weighted through "deltaPrice".
+    /// @param price        Actual price with 9 decimals returned from Chainlink price-feed.
+    /// @param longOrShort  True = Long position, False = short position.
+    /// @return rho         The computed price risk.
     function computePriceRisk(uint256 price, bool longOrShort) private view returns (uint256 rho) {
         if (longOrShort == true) {
             if (price > strikePrice) {
@@ -220,6 +230,8 @@ contract Diode is ERC721, Ownable {
         }
     }
 
+    /// @notice Called at "finalTime" to close the pool and determine the "endPrice".
+    /// @dev    Only callable by the owner of the pool.
     function closePool() external onlyOwner {
         require(block.timestamp > finalTime);
         poolIsClosed = true;
@@ -235,6 +247,9 @@ contract Diode is ERC721, Ownable {
 
     }
 
+    /// @notice Function to claim tokens and rewards (if any) after pool is closed.
+    /// @param tokenID Token ID to claim for.
+    /// @return _amountOwed Amount of underlying token to transfer to tokenholder.
     function getReward(uint256 tokenID) external returns (uint256 _amountOwed) {
         require(block.timestamp > finalTime && poolIsClosed == true);
         require(ownerOf(tokenID) == _msgSender(), "user is not Owner of token ID");
@@ -271,6 +286,8 @@ contract Diode is ERC721, Ownable {
         }
     }
 
+    /// @notice Will transfer the fees collected to the owner.
+    /// @dev Only callable by owner().
     function collectFees() external onlyOwner {
         require(feesCollected > 0, "not enough fees to withdraw");
         uint256 amountToSend = feesCollected;
@@ -278,6 +295,8 @@ contract Diode is ERC721, Ownable {
         IERC20(suppliedAsset).safeTransfer(_msgSender(), amountToSend);
     }
 
+    /// @notice Will standardize the price returned from Chainlink to 9 decimals.
+    /// @return standardizedAmount The price returned in 9 decimals.
     function standardizeBase9Chainlink(uint256 amount) private view returns (uint256 standardizedAmount) {
         standardizedAmount = amount;
         
@@ -288,6 +307,8 @@ contract Diode is ERC721, Ownable {
         }
     }
 
+    /// @notice Will standardize the amount of a given asset to 9 decimals.
+    /// @return standardizedAmount The amount returned in 9 decimals.
     function standardizeBase9(uint256 amount, address asset) private view returns (uint256 standardizedAmount) {
         standardizedAmount = amount;
         
@@ -298,6 +319,9 @@ contract Diode is ERC721, Ownable {
         }
     }
 
+    /// @notice Returns the factor of multiplication for the APY with current pool composition.
+    /// (APY multiplicatior on remaining period for longs if no change in TVL).
+    /// @return standardizedMultiplicator Multiplication factor standardized to 9 decimals. 
     function apyBoosterLong() public view returns (uint256 standardizedMultiplicator) {
 
         if (totalDepositsLONG > 0) {
@@ -309,6 +333,9 @@ contract Diode is ERC721, Ownable {
         }
     }
 
+    /// @notice Returns the factor of multiplication for the APY with current pool composition.
+    /// (APY multiplicatior on remaining period for shorts if no change in TVL).
+    /// @return standardizedMultiplicator Multiplication factor standardized to 9 decimals. 
     function apyBoosterShort() public view returns (uint256 standardizedMultiplicator) {
 
         if (totalDepositsSHORT > 0) {
@@ -319,6 +346,10 @@ contract Diode is ERC721, Ownable {
         }
     }
 
+    /// @notice Returns the factor of multiplication for the APY based on long/short position
+    /// and actual price.
+    /// @param _longOrShort True = long position, False = short position.
+    /// @return apyMultiplicator Returned APY multiplicator based on position and actual price.
     function actualAPYBooster(bool _longOrShort) public view returns (uint256 apyMultiplicator) {
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
