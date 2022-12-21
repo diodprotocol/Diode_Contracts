@@ -48,46 +48,48 @@ contract Diode is ERC721, Ownable {
     //  State Variables
     // -----------------
 
-    uint256 public startTime;
-    uint256 public finalTime;
-    uint256 public duration;
-    uint256 public endPrice;
-    uint256 public totalRewards;
-    uint256 public tokenCount;
-    uint256 public totalDeposits;
-    uint256 public totalDepositsLONG;
-    uint256 public totalDepositsSHORT;
-    uint256 public totalReturnedFromStrat;
-    uint256 public feesCollected;
+    uint256 public startTime;                /// @dev Time when pool will be open for deposits.
+    uint256 public finalTime;                /// @dev Time at which pool will be closed (and open for withdrawals).
+    uint256 public duration;                 /// @dev Total duration of the pool.
+    uint256 public endPrice;                 /// @dev Price of underlying asset at "finalTime".
+    uint256 public totalRewards;             /// @dev Rewards earned over period (finalTime - startTime) from the underlying strategy.
+    uint256 public tokenCount;               /// @dev Will increase with each ERC721 token minted.
+    uint256 public totalDeposits;            /// @dev Total amount of underlying asset provided to the pool.
+    uint256 public totalDepositsLONG;        /// @dev Total amount of underlying asset which were provided with a 'long' position.
+    uint256 public totalDepositsSHORT;       /// @dev Total amount of underlying asset which were provided with a 'short' position.
+    uint256 public totalReturnedFromStrat;   /// @dev Amount returned from strategy at "finalTime" if: amount received < totalDeposits.
+    uint256 public feesCollected;            /// @dev Fees collected upon withdrawal from pool.
+    uint256[2] public capLongShort;          /// @dev Max "long" and max "shorts" amounts possible to provide to the pool.
+
     /// @dev in BIPS
-    uint256 public withdrawFees;
-    uint256[2] public capLongShort;
+    uint256 public withdrawFees;             /// @dev Fees percentage in BIPS.
 
     /// @dev Base 18 variables
-    uint256 public alphaLongs;
-    uint256 public alphaShorts;
+    uint256 public alphaLongs;               /// @dev Total long deposits weighted according to their contracted option.
+                                             /// i.e. related to their time of deposit and risk taken on price position.
+    uint256 public alphaShorts;              /// @dev Total short deposits weighted according to their contracted option.
+                                             /// i.e. related to their time of deposit and risk taken on price position.
 
     /// @dev Base 9 variables
-    uint256 public strikePrice;
-    uint256 public deltaPrice;
+    uint256 public strikePrice;              /// @dev The price on which long and short positions will be settled at "finalTime". 
+    uint256 public deltaPrice;               /// @dev Factor of risk taken on price position.
 
-    address public stratContract;
-    address public suppliedAsset;
-    address public chainlinkPriceFeed;
+    address public stratContract;            /// @dev Address of the contract of the underlying strategy.
+    address public suppliedAsset;            /// @dev Asset provided to the pool.
+    address public chainlinkPriceFeed;       /// @dev Address of Chainlink's price feed.
 
-    bool public poolIsClosed;   
-    bool public strategyActivated;
+    bool public poolIsClosed;                /// @dev Returns "true" when pool is closed after "finalTime".
+    bool public strategyActivated;           /// @dev Returns "true" when the underlying strategy has been set.
 
     struct UserDeposit {
-        uint256 amount;
-        // 9 decimals for assetPrice
-        uint256 assetPrice;
-        bool longOrShort;
-        // 18 decimals for alpha
-        uint256 alpha;
+        uint256 amount;                      /// @dev Amount of underlying token deposited. 
+        uint256 assetPrice;                  /// @dev Price of underlying asset at moment of deposit (9 decimals).
+        bool longOrShort;                    /// @dev true = long position, false = short position.
+        uint256 alpha;                       /// @dev Deposit amount weighted according to the contracted option (18 decimals).
+                                             /// i.e. related to their time of deposit and risk taken on price position.
     }
 
-    mapping(uint256 => UserDeposit) public tokenToPosition;
+    mapping(uint256 => UserDeposit) public tokenToPosition;  /// @dev The order is tokenID -> UserDeposit.
 
 
     // -----------------
@@ -95,7 +97,7 @@ contract Diode is ERC721, Ownable {
     // -----------------
 
 
-    /// @notice Initializes the Iode pool.
+    /// @notice Initializes the Diode pool.
     /// @param _strikePrice strike price for the supplied asset at the end of duration of the pool, (base 9).
     /// @param _asset address of the asset supplied to the pool.
     /// @param _duration duration for this contract in seconds.
