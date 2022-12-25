@@ -144,6 +144,7 @@ contract Diode is ERC721, Ownable {
 
     /// @notice Will set the address of the strategy of the pool.
     /// @param _strat address of the underlying strategy.
+    /// @dev This function should only be called once.
     function setStrategy(address _strat) external {
         require(strategyActivated == false);
         strategyActivated = true;

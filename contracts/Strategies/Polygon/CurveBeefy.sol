@@ -35,11 +35,11 @@ contract CurveBeefy is Ownable {
     // -----------------
 
     
-    address public underlyingToken;
-    address public curvePool;
-    address public beefyVault;
-    address public curveLPToken;
-    uint256 public assetCurveIndex;
+    address public underlyingToken;         /// @dev Token supplied in this strategy.
+    address public curvePool;               /// @dev Address of the Curve Pool of this strategy.
+    address public curveLPToken;            /// @dev Address of the LP Token of the Curve Pool.
+    address public beefyVault;              /// @dev Address of Beefy vault where to deposit Curve LP tokens.
+    uint256 public assetCurveIndex;         /// @dev The index of the underlying token in the Curve Pool.
 
 
     // -----------------
@@ -47,7 +47,7 @@ contract CurveBeefy is Ownable {
     // -----------------
 
 
-    /// @notice Initializes Curve-Beefy strategy.
+    /// @notice Initializes Curve-Beefy strategy for a specific Diode Pool.
     constructor(
         address _underlyingToken, 
         address _diodePool,
@@ -77,6 +77,11 @@ contract CurveBeefy is Ownable {
     // -----------------
 
 
+    /// @notice This function will deposit the supplied asset in a Curve Pool and then deposit the LP
+    /// tokens received in the corresponding Beefy vault.
+    /// @dev This function should only be called by owner() which is the Diode pool.
+    /// @param token Address of the supplied token.
+    /// @param amount The amount of tokens to deposit.
     function deposit (address token, uint256 amount) external onlyOwner {
         require(token == underlyingToken, "token supplied not supported by this strategy");
         IERC20(underlyingToken).safeTransferFrom(_msgSender(), address(this), amount);
@@ -94,20 +99,22 @@ contract CurveBeefy is Ownable {
         IBeefyVault(beefyVault).deposit(IERC20(curveLPToken).balanceOf(address(this)));
     }
 
+
+    /// @notice This function will remove liquidity in this order Beefy -> Curve.
+    /// And transfer the underlying assets to the underlying Diode Pool.
+    /// @dev Should only be called by owner(), which is the Diode Pool.
+    /// @return returnedAmount The amount of underlying tokens received when removing liquidity.
     function withdraw() external onlyOwner returns (uint256 returnedAmount) {
         IBeefyVault(beefyVault).withdrawAll();
         ICRVPlainPool(curvePool).remove_liquidity_one_coin(IERC20(curveLPToken).balanceOf(address(this)), assetCurveIndex, 0);
-        // TODO: after testing should set returnedAmount = to above call
         returnedAmount = IERC20(underlyingToken).balanceOf(address(this));
         IERC20(underlyingToken).safeTransfer(owner(), IERC20(underlyingToken).balanceOf(address(this)));
     }
 
-
-    function stratBalance() public view returns (uint256 totalInvested) {
-        totalInvested = IBeefyVault(beefyVault).balanceOf(address(this));
+    /// @notice This function will return the total amount of Curve LP tokens staked on Beefy.
+    /// @return stratLpBalance The amount of Curve LP tokens deposited by this this strategy in Beefy Vault.
+    function stratBalance() public view returns (uint256 stratLpBalance) {
+        stratLpBalance = IBeefyVault(beefyVault).balanceOf(address(this));
     }
 
-    function getSupplyAPY() external view onlyOwner returns (uint256 _apy) {
-        _apy = 0;
-    }
 }
