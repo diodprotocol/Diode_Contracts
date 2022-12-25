@@ -188,7 +188,6 @@ contract Diode_test_Polygon is Test {
         assert(curveBeefy.stratBalance() > 0);
 
         vm.startPrank(address(diode));
-        emit log_named_uint("get APY Booster Strategy:", curveBeefy.getSupplyAPY());
         uint256 returnedAmount = curveBeefy.withdraw();
         //uint256 returned = curveBeefy.unstakeFromCurve();
         vm.stopPrank();
@@ -417,7 +416,5 @@ contract Diode_test_Polygon is Test {
         emit log_named_uint("total longs:", diode.alphaLongs());
         emit log_named_uint("total shorts:", diode.alphaShorts());
     }
-
-
 
 }

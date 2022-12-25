@@ -19,7 +19,7 @@ import "../Strategies/Polygon/CurveBeefy.sol";
 /// @title Diode protocol Pool Factory Polygon Curve-Beefy
 /// @author Diode Protocol core team 
 
-contract DiodeFactPolygon is Ownable {
+contract Factory_CURVE_BEEFY is Ownable {
 
 
     // ============================ Events ==========================

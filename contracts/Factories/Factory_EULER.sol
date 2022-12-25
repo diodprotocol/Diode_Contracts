@@ -18,7 +18,7 @@ import "../Strategies/Mainnet/EulerStrat.sol";
 /// @title Diode protocol Pool Factory
 /// @author Diode Protocol core team 
 
-contract DiodeFactoryAll {
+contract Factory_EULER {
 
 
     // ============================ Events ==========================
