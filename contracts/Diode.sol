@@ -134,6 +134,7 @@ contract Diode is ERC721, Ownable {
         deltaPrice = _deltaPrice;
         withdrawFees = _fees;
         capLongShort = _capLongShort;
+        // Here we are using tx.origin as pools are being deployed via a factory
         transferOwnership(tx.origin);
     }
 
@@ -240,6 +241,7 @@ contract Diode is ERC721, Ownable {
         require(price > 0);
         endPrice = standardizeBase9Chainlink(uint256(price));
         uint256 returnedAmount = IStrategy(stratContract).withdraw();
+        returnedAmount <= totalDeposits ? totalReturnedFromStrat = returnedAmount : totalRewards = returnedAmount - totalDeposits;
         if (returnedAmount <= totalDeposits) {
             totalReturnedFromStrat = returnedAmount;
         } else if (returnedAmount > totalDeposits) {
