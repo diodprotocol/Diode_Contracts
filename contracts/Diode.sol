@@ -147,7 +147,7 @@ contract Diode is ERC721, Ownable {
     /// @param _strat address of the underlying strategy.
     /// @dev This function should only be called once.
     function setStrategy(address _strat) external {
-        require(strategyActivated == false);
+        require(strategyActivated == false, "Strategy already set for pool");
         strategyActivated = true;
         stratContract = _strat;
     }
@@ -166,7 +166,7 @@ contract Diode is ERC721, Ownable {
         uint256 _standardizedAmount
     ) 
     {
-        require(block.timestamp >= startTime);
+        require(block.timestamp >= startTime, "block.timestamp <= startTime");
         if (longShort == true) {
             require(totalDepositsLONG + amount <= capLongShort[0], "Max amount for long positions exceeded");
         } else {
@@ -235,7 +235,7 @@ contract Diode is ERC721, Ownable {
     /// @notice Called at "finalTime" to close the pool and determine the "endPrice".
     /// @dev    Only callable by the owner of the pool.
     function closePool() external onlyOwner {
-        require(block.timestamp > finalTime);
+        require(block.timestamp > finalTime, "Pool not yet ended");
         poolIsClosed = true;
         (,int price,,,) = AggregatorV3Interface(chainlinkPriceFeed).latestRoundData();
         require(price > 0);
@@ -254,7 +254,7 @@ contract Diode is ERC721, Ownable {
     /// @param tokenID Token ID to claim for.
     /// @return _amountOwed Amount of underlying token to transfer to tokenholder.
     function getReward(uint256 tokenID) external returns (uint256 _amountOwed) {
-        require(block.timestamp > finalTime && poolIsClosed == true);
+        require(block.timestamp > finalTime && poolIsClosed == true, "Pool not yet ended");
         require(ownerOf(tokenID) == _msgSender(), "user is not Owner of token ID");
 
         uint256 amountOwed;
